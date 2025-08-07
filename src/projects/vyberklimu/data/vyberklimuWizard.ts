@@ -93,19 +93,35 @@ export const vyberklimuSteps: WizardStep[] = [
         id: 'property-basic',
         title: 'Základní informace o objektu',
         icon: 'Home',
-        fields: ['propertyType', 'propertyOwnership']
+        fields: ['propertyType', 'propertyOwnership', 'propertyOwnershipOther', 'monumentZone', 'buildingAge', 'floorArea', 'floorCount', 'ceilingHeight']
       },
       {
         id: 'location',
         title: 'Lokace objektu',
         icon: 'MapPin',
-        fields: ['address', 'region']
+        fields: ['address', 'addressLon', 'addressLat', 'distributionArea']
       },
       {
-        id: 'building-details',
-        title: 'Detaily budovy',
+        id: 'household',
+        title: 'Domácnost',
+        icon: 'Users',
+        fields: ['adultsCount', 'childrenCount']
+      },
+      {
+        id: 'apartment-units',
+        title: 'Počet jednotek',
+        icon: 'Grid',
+        fields: ['unitsCount']
+      },
+      {
+        id: 'business',
+        title: 'Firemní údaje',
         icon: 'Building',
-        fields: ['buildingAge', 'floorArea', 'floorCount', 'ceilingHeight']
+        fields: ['ico'],
+        conditional: {
+          dependsOn: 'propertyType',
+          values: ['commercial', 'industrial']
+        }
       }
     ],
     fields: [
@@ -118,7 +134,7 @@ export const vyberklimuSteps: WizardStep[] = [
         group: 'property-basic',
         options: [
           { value: 'family-house', label: 'Rodinný dům', icon: 'Home' },
-          { value: 'apartment', label: 'Byt', icon: 'Building2' },
+          { value: 'apartment-building', label: 'Bytový dům', icon: 'Building2' },
           { value: 'commercial', label: 'Komerční objekt', icon: 'Store' },
           { value: 'industrial', label: 'Průmyslový objekt', icon: 'Factory' }
         ]
@@ -132,7 +148,98 @@ export const vyberklimuSteps: WizardStep[] = [
         group: 'property-basic',
         options: [
           { value: 'owner', label: 'Vlastník', icon: 'Key' },
-          { value: 'tenant', label: 'Nájemník', icon: 'Users' }
+          { value: 'tenant', label: 'Nájemník', icon: 'Users' },
+          { value: 'other', label: 'Jiné', icon: 'HelpCircle' }
+        ]
+      },
+      {
+        id: 'propertyOwnershipOther',
+        type: 'select',
+        label: 'Specifikujte typ vlastnictví',
+        required: true,
+        icon: 'HelpCircle',
+        group: 'property-basic',
+        conditional: {
+          dependsOn: 'propertyOwnership',
+          values: ['other']
+        },
+        options: [
+          { value: 'investor', label: 'Investor' },
+          { value: 'sponsor', label: 'Sponzor' },
+          { value: 'cooperative', label: 'Družstvo' },
+          { value: 'municipality', label: 'Obec/město' },
+          { value: 'company', label: 'Společnost' }
+        ]
+      },
+      {
+        id: 'monumentZone',
+        type: 'radio',
+        label: 'Památková zóna',
+        required: true,
+        icon: 'Landmark',
+        group: 'property-basic',
+        conditional: {
+          dependsOn: 'propertyType',
+          values: ['apartment-building', 'commercial']
+        },
+        options: [
+          { value: 'yes', label: 'Ano', icon: 'Check' },
+          { value: 'no', label: 'Ne', icon: 'X' }
+        ]
+      },
+      {
+        id: 'buildingAge',
+        type: 'select',
+        label: 'Stáří budovy',
+        required: true,
+        icon: 'Clock',
+        group: 'property-basic',
+        options: [
+          { value: 'ac-new', label: 'Novostavba (do 5 let)' },
+          { value: 'ac-recent', label: '5-15 let' },
+          { value: 'ac-older', label: '15-30 let' },
+          { value: 'ac-old', label: 'Nad 30 let' }
+        ]
+      },
+      {
+        id: 'floorArea',
+        type: 'number',
+        label: 'Plocha prostoru pro klimatizaci (m²)',
+        placeholder: 'Např. 120',
+        required: true,
+        icon: 'Ruler',
+        group: 'property-basic',
+        validation: {
+          min: 5,
+          max: 5000,
+          message: 'Plocha musí být mezi 5 a 5000 m²'
+        }
+      },
+      {
+        id: 'floorCount',
+        type: 'select',
+        label: 'Počet podlaží budovy',
+        required: true,
+        icon: 'Layers',
+        group: 'property-basic',
+        options: [
+          { value: '1', label: '1 podlaží' },
+          { value: '2', label: '2 podlaží' },
+          { value: '3', label: '3 podlaží' },
+          { value: '4+', label: '4 a více podlaží' }
+        ]
+      },
+      {
+        id: 'ceilingHeight',
+        type: 'select',
+        label: 'Výška stropů',
+        required: true,
+        icon: 'ArrowUpDown',
+        group: 'property-basic',
+        options: [
+          { value: 'ac-low', label: 'Nízké (do 2.5m)' },
+          { value: 'ac-standard', label: 'Standardní (2.5-3m)' },
+          { value: 'ac-high', label: 'Vysoké (nad 3m)' }
         ]
       },
       {
@@ -145,89 +252,112 @@ export const vyberklimuSteps: WizardStep[] = [
         group: 'location',
         autocompleteConfig: {
           apiUrl: 'https://api.mapy.cz/v1/suggest',
-          apiKey: 'VÁŠ_API_KLÍČ_MAPY_CZ', // Nahraďte svým skutečným API klíčem
+          apiKey: 'vCdbERKNLmfB7W-gZ1LgJyP2Ou0UnXeR1NhQxB1RclU',
           searchParam: 'query',
           responseField: 'items'
         }
       },
       {
-        id: 'region',
+        id: 'addressLon',
+        type: 'number',
+        label: '',
+        required: false,
+        group: 'location'
+      },
+      {
+        id: 'addressLat',
+        type: 'number',
+        label: '',
+        required: false,
+        group: 'location'
+      },
+      {
+        id: 'distributionArea',
         type: 'select',
-        label: 'Kraj',
+        label: 'Distribuční území',
         required: true,
-        icon: 'Map',
+        icon: 'Zap',
         group: 'location',
         options: [
-          { value: 'praha', label: 'Praha' },
-          { value: 'stredocesky', label: 'Středočeský kraj' },
-          { value: 'jihocesky', label: 'Jihočeský kraj' },
-          { value: 'plzensky', label: 'Plzeňský kraj' },
-          { value: 'karlovarsky', label: 'Karlovarský kraj' },
-          { value: 'ustecky', label: 'Ústecký kraj' },
-          { value: 'liberecky', label: 'Liberecký kraj' },
-          { value: 'kralovehradecky', label: 'Královéhradecký kraj' },
-          { value: 'pardubicky', label: 'Pardubický kraj' },
-          { value: 'vysocina', label: 'Kraj Vysočina' },
-          { value: 'jihomoravsky', label: 'Jihomoravský kraj' },
-          { value: 'olomoucky', label: 'Olomoucký kraj' },
-          { value: 'zlinsky', label: 'Zlínský kraj' },
-          { value: 'moravskoslezsky', label: 'Moravskoslezský kraj' }
+          { value: 'cez', label: 'ČEZ Distribuce' },
+          { value: 'pre', label: 'PRE Distribuce' },
+          { value: 'edg', label: 'E.ON Distribuce' }
         ]
       },
       {
-        id: 'buildingAge',
+        id: 'adultsCount',
         type: 'select',
-        label: 'Stáří budovy',
+        label: 'Počet dospělých osob v domácnosti',
         required: true,
-        icon: 'Clock',
-        group: 'building-details',
+        icon: 'Users',
+        group: 'household',
+        conditional: {
+          dependsOn: 'propertyType',
+          values: ['family-house']
+        },
         options: [
-          { value: 'new', label: 'Novostavba (do 5 let)' },
-          { value: 'recent', label: '5-15 let' },
-          { value: 'older', label: '15-30 let' },
-          { value: 'old', label: 'Nad 30 let' }
+          { value: '1', label: '1 osoba' },
+          { value: '2', label: '2 osoby' },
+          { value: '3', label: '3 osoby' },
+          { value: '4', label: '4 osoby' },
+          { value: '5', label: '5 osob' },
+          { value: '6+', label: '6 a více osob' }
         ]
       },
       {
-        id: 'floorArea',
-        type: 'number',
-        label: 'Plocha prostoru pro klimatizaci (m²)',
-        placeholder: 'Např. 120',
+        id: 'childrenCount',
+        type: 'select',
+        label: 'Počet dětí v domácnosti',
+        required: false,
+        icon: 'Baby',
+        group: 'household',
+        conditional: {
+          dependsOn: 'propertyType',
+          values: ['family-house']
+        },
+        options: [
+          { value: '0', label: 'Žádné děti' },
+          { value: '1', label: '1 dítě' },
+          { value: '2', label: '2 děti' },
+          { value: '3', label: '3 děti' },
+          { value: '4+', label: '4 a více dětí' }
+        ]
+      },
+      {
+        id: 'unitsCount',
+        type: 'select',
+        label: 'Počet bytových jednotek',
         required: true,
-        icon: 'Ruler',
-        group: 'building-details',
+        icon: 'Grid',
+        group: 'apartment-units',
+        conditional: {
+          dependsOn: 'propertyType',
+          values: ['apartment-building']
+        },
+        options: [
+          { value: '0-5', label: '0 - 5 jednotek' },
+          { value: '5-15', label: '5 - 15 jednotek' },
+          { value: '15-50', label: '15 - 50 jednotek' },
+          { value: '50-100', label: '50 - 100 jednotek' },
+          { value: '100+', label: '100+ jednotek' }
+        ]
+      },
+      {
+        id: 'ico',
+        type: 'text',
+        label: 'IČO',
+        placeholder: 'Zadejte IČO',
+        required: true,
+        icon: 'Hash',
+        group: 'business',
+        conditional: {
+          dependsOn: 'propertyType',
+          values: ['commercial', 'industrial']
+        },
         validation: {
-          min: 5,
-          max: 1000,
-          message: 'Plocha musí být mezi 5 a 1000 m²'
+          pattern: '^[0-9]{8}$',
+          message: 'IČO musí obsahovat 8 číslic'
         }
-      },
-      {
-        id: 'floorCount',
-        type: 'select',
-        label: 'Počet podlaží budovy',
-        required: false,
-        icon: 'Layers',
-        group: 'building-details',
-        options: [
-          { value: '1', label: '1 podlaží' },
-          { value: '2', label: '2 podlaží' },
-          { value: '3', label: '3 podlaží' },
-          { value: '4+', label: '4 a více podlaží' }
-        ]
-      },
-      {
-        id: 'ceilingHeight',
-        type: 'select',
-        label: 'Výška stropů',
-        required: false,
-        icon: 'ArrowUpDown',
-        group: 'building-details',
-        options: [
-          { value: 'low', label: 'Nízké (do 2.5m)' },
-          { value: 'standard', label: 'Standardní (2.5-3m)' },
-          { value: 'high', label: 'Vysoké (nad 3m)' }
-        ]
       }
     ]
   },
@@ -251,7 +381,7 @@ export const vyberklimuSteps: WizardStep[] = [
       },
       {
         id: 'cooling-power',
-        title: 'Chladicí výkon',
+        title: 'Chladicí a topný výkon',
         icon: 'Thermometer',
         fields: ['acCoolingPower', 'acHeatingPower']
       }
@@ -265,9 +395,9 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'Snowflake',
         group: 'ac-basic',
         options: [
-          { value: 'cooling', label: 'Pouze chlazení', icon: 'Snowflake' },
-          { value: 'cooling-heating', label: 'Chlazení a vytápění', icon: 'Thermometer' },
-          { value: 'all-year', label: 'Celoroční použití (vytápění i chlazení)', icon: 'Calendar' }
+          { value: 'ac-cooling', label: 'Pouze chlazení', icon: 'Snowflake' },
+          { value: 'ac-cooling-heating', label: 'Chlazení a vytápění', icon: 'Thermometer' },
+          { value: 'ac-all-year', label: 'Celoroční použití (vytápění i chlazení)', icon: 'Calendar' }
         ]
       },
       {
@@ -278,13 +408,17 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'LayoutDashboard',
         group: 'ac-basic',
         options: [
-          { value: 'living-room', label: 'Obývací pokoj', icon: 'Sofa' },
-          { value: 'bedroom', label: 'Ložnice', icon: 'Bed' },
-          { value: 'kitchen', label: 'Kuchyně', icon: 'ChefHat' },
-          { value: 'office', label: 'Pracovna/kancelář', icon: 'Briefcase' },
-          { value: 'children-room', label: 'Dětský pokoj', icon: 'Baby' },
-          { value: 'hall', label: 'Chodba/hala', icon: 'Door' },
-          { value: 'other', label: 'Jiná místnost', icon: 'HelpCircle' }
+          { value: 'ac-living-room', label: 'Obývací pokoj', icon: 'Sofa' },
+          { value: 'ac-bedroom', label: 'Ložnice', icon: 'Bed' },
+          { value: 'ac-kitchen', label: 'Kuchyně', icon: 'ChefHat' },
+          { value: 'ac-office', label: 'Pracovna/kancelář', icon: 'Briefcase' },
+          { value: 'ac-children-room', label: 'Dětský pokoj', icon: 'Baby' },
+          { value: 'ac-hall', label: 'Chodba/hala', icon: 'Door' },
+          { value: 'ac-meeting-room', label: 'Jednací místnost', icon: 'Users', conditional: { dependsOn: 'propertyType', values: ['commercial', 'industrial'] } },
+          { value: 'ac-production-area', label: 'Výrobní prostory', icon: 'Factory', conditional: { dependsOn: 'propertyType', values: ['industrial'] } },
+          { value: 'ac-warehouse', label: 'Sklad', icon: 'Package', conditional: { dependsOn: 'propertyType', values: ['commercial', 'industrial'] } },
+          { value: 'ac-server-room', label: 'Serverovna', icon: 'Server', conditional: { dependsOn: 'propertyType', values: ['commercial', 'industrial'] } },
+          { value: 'ac-other', label: 'Jiná místnost', icon: 'HelpCircle' }
         ]
       },
       {
@@ -295,11 +429,13 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'Box',
         group: 'ac-basic',
         options: [
-          { value: 'split', label: 'Nástěnné split jednotky (pro jednotlivé místnosti)', icon: 'SplitSquareVertical' },
-          { value: 'multi-split', label: 'Multi-split (jedna venkovní, více vnitřních)', icon: 'Network' },
-          { value: 'central', label: 'Centrální klimatizace (rozvody po celém objektu)', icon: 'Layout' },
-          { value: 'portable', label: 'Mobilní jednotky (bez instalace)', icon: 'Move' },
-          { value: 'advice', label: 'Potřebuji poradit s výběrem', icon: 'HelpCircle' }
+          { value: 'ac-split', label: 'Nástěnné split jednotky (pro jednotlivé místnosti)', icon: 'SplitSquareVertical' },
+          { value: 'ac-multi-split', label: 'Multi-split (jedna venkovní, více vnitřních)', icon: 'Network' },
+          { value: 'ac-central', label: 'Centrální klimatizace (rozvody po celém objektu)', icon: 'Layout' },
+          { value: 'ac-cassette', label: 'Kazetové jednotky (do podhledů)', icon: 'Grid3x3', conditional: { dependsOn: 'propertyType', values: ['commercial', 'industrial'] } },
+          { value: 'ac-ducted', label: 'Potrubní jednotky (skryté rozvody)', icon: 'Layers', conditional: { dependsOn: 'propertyType', values: ['commercial', 'industrial'] } },
+          { value: 'ac-portable', label: 'Mobilní jednotky (bez instalace)', icon: 'Move' },
+          { value: 'ac-advice', label: 'Potřebuji poradit s výběrem', icon: 'HelpCircle' }
         ]
       },
       {
@@ -310,12 +446,14 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'ListChecks',
         group: 'ac-features',
         options: [
-          { value: 'low-noise', label: 'Tichý provoz', icon: 'Volume1' },
-          { value: 'air-purification', label: 'Čištění vzduchu / filtrace', icon: 'Wind' },
-          { value: 'dehumidification', label: 'Odvlhčování', icon: 'Droplets' },
-          { value: 'wifi', label: 'WiFi připojení / ovládání aplikací', icon: 'Wifi' },
-          { value: 'energy-efficiency', label: 'Vysoká energetická účinnost', icon: 'Zap' },
-          { value: 'design', label: 'Designové provedení', icon: 'Palette' }
+          { value: 'ac-low-noise', label: 'Tichý provoz', icon: 'Volume1' },
+          { value: 'ac-air-purification', label: 'Čištění vzduchu / filtrace', icon: 'Wind' },
+          { value: 'ac-dehumidification', label: 'Odvlhčování', icon: 'Droplets' },
+          { value: 'ac-wifi', label: 'WiFi připojení / ovládání aplikací', icon: 'Wifi' },
+          { value: 'ac-energy-efficiency', label: 'Vysoká energetická účinnost', icon: 'Zap' },
+          { value: 'ac-design', label: 'Designové provedení', icon: 'Palette' },
+          { value: 'ac-inverter', label: 'Inverter technologie', icon: 'BarChart3' },
+          { value: 'ac-heat-recovery', label: 'Rekuperace tepla', icon: 'RefreshCw' }
         ]
       },
       {
@@ -326,11 +464,13 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'Smartphone',
         group: 'ac-features',
         options: [
-          { value: 'app-control', label: 'Ovládání přes mobilní aplikaci', icon: 'Smartphone' },
-          { value: 'voice-control', label: 'Hlasové ovládání (Google, Alexa, Siri)', icon: 'Mic' },
-          { value: 'scheduling', label: 'Automatické plánování provozu', icon: 'Calendar' },
-          { value: 'presence-detection', label: 'Detekce přítomnosti osob', icon: 'User' },
-          { value: 'remote-diagnostics', label: 'Vzdálená diagnostika', icon: 'ActivitySquare' }
+          { value: 'ac-app-control', label: 'Ovládání přes mobilní aplikaci', icon: 'Smartphone' },
+          { value: 'ac-voice-control', label: 'Hlasové ovládání (Google, Alexa, Siri)', icon: 'Mic' },
+          { value: 'ac-scheduling', label: 'Automatické plánování provozu', icon: 'Calendar' },
+          { value: 'ac-presence-detection', label: 'Detekce přítomnosti osob', icon: 'User' },
+          { value: 'ac-remote-diagnostics', label: 'Vzdálená diagnostika', icon: 'ActivitySquare' },
+          { value: 'ac-energy-monitoring', label: 'Monitoring spotřeby energie', icon: 'TrendingUp' },
+          { value: 'ac-geofencing', label: 'Geofencing (automatické zapnutí při příchodu)', icon: 'MapPin' }
         ]
       },
       {
@@ -341,44 +481,44 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'Zap',
         group: 'ac-features',
         options: [
-          { value: 'a+++', label: 'A+++ (nejvyšší účinnost)', icon: 'Star' },
-          { value: 'a++', label: 'A++', icon: 'Star' },
-          { value: 'a+', label: 'A+', icon: 'Star' },
-          { value: 'any', label: 'Nevím / není důležité', icon: 'HelpCircle' }
+          { value: 'ac-a+++', label: 'A+++ (nejvyšší účinnost)', icon: 'Star' },
+          { value: 'ac-a++', label: 'A++', icon: 'Star' },
+          { value: 'ac-a+', label: 'A+', icon: 'Star' },
+          { value: 'ac-any', label: 'Nevím / není důležité', icon: 'HelpCircle' }
         ]
       },
       {
         id: 'acCoolingPower',
         type: 'select',
         label: 'Požadovaný chladicí výkon',
-        required: false,
+        required: true,
         icon: 'Snowflake',
         group: 'cooling-power',
         options: [
-          { value: 'low', label: 'Nízký (do 2.5 kW)' },
-          { value: 'medium', label: 'Střední (2.5 - 5 kW)' },
-          { value: 'high', label: 'Vysoký (5 - 10 kW)' },
-          { value: 'very-high', label: 'Velmi vysoký (nad 10 kW)' },
-          { value: 'unknown', label: 'Nevím, potřebuji poradit' }
+          { value: 'ac-cooling-low', label: 'Nízký (do 2.5 kW)' },
+          { value: 'ac-cooling-medium', label: 'Střední (2.5 - 5 kW)' },
+          { value: 'ac-cooling-high', label: 'Vysoký (5 - 10 kW)' },
+          { value: 'ac-cooling-very-high', label: 'Velmi vysoký (nad 10 kW)' },
+          { value: 'ac-cooling-unknown', label: 'Nevím, potřebuji poradit' }
         ]
       },
       {
         id: 'acHeatingPower',
         type: 'select',
         label: 'Požadovaný topný výkon',
-        required: false,
+        required: true,
         icon: 'Flame',
         group: 'cooling-power',
         conditional: {
           dependsOn: 'acPurpose',
-          values: ['cooling-heating', 'all-year']
+          values: ['ac-cooling-heating', 'ac-all-year']
         },
         options: [
-          { value: 'low', label: 'Nízký (do 3 kW)' },
-          { value: 'medium', label: 'Střední (3 - 6 kW)' },
-          { value: 'high', label: 'Vysoký (6 - 12 kW)' },
-          { value: 'very-high', label: 'Velmi vysoký (nad 12 kW)' },
-          { value: 'unknown', label: 'Nevím, potřebuji poradit' }
+          { value: 'ac-heating-low', label: 'Nízký (do 3 kW)' },
+          { value: 'ac-heating-medium', label: 'Střední (3 - 6 kW)' },
+          { value: 'ac-heating-high', label: 'Vysoký (6 - 12 kW)' },
+          { value: 'ac-heating-very-high', label: 'Velmi vysoký (nad 12 kW)' },
+          { value: 'ac-heating-unknown', label: 'Nevím, potřebuji poradit' }
         ]
       }
     ]
@@ -393,7 +533,7 @@ export const vyberklimuSteps: WizardStep[] = [
         id: 'existing-cooling',
         title: 'Stávající chlazení',
         icon: 'Fan',
-        fields: ['hasCooling', 'coolingType', 'coolingAge']
+        fields: ['hasCooling', 'coolingType', 'coolingAge', 'coolingProblems']
       },
       {
         id: 'installation-readiness',
@@ -402,10 +542,10 @@ export const vyberklimuSteps: WizardStep[] = [
         fields: ['hasOutdoorSpace', 'hasElectricalReadiness', 'hasWallPermission', 'outdoorUnitDistance']
       },
       {
-        id: 'structural',
+        id: 'structural-details',
         title: 'Stavební připravenost',
         icon: 'Building',
-        fields: ['hasOpenings', 'renovationPlans']
+        fields: ['hasOpenings', 'renovationPlans', 'buildingRestrictions']
       }
     ],
     fields: [
@@ -417,27 +557,28 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'Fan',
         group: 'existing-cooling',
         options: [
-          { value: 'yes', label: 'Ano', icon: 'Check' },
-          { value: 'no', label: 'Ne', icon: 'X' }
+          { value: 'ac-yes', label: 'Ano', icon: 'Check' },
+          { value: 'ac-no', label: 'Ne', icon: 'X' }
         ]
       },
       {
         id: 'coolingType',
-        type: 'select',
+        type: 'multiselect',
         label: 'Jaký typ chlazení používáte?',
         required: true,
         icon: 'Fan',
         group: 'existing-cooling',
         conditional: {
           dependsOn: 'hasCooling',
-          values: ['yes']
+          values: ['ac-yes']
         },
         options: [
-          { value: 'portable-ac', label: 'Mobilní klimatizace' },
-          { value: 'split-ac', label: 'Split jednotky' },
-          { value: 'fans', label: 'Ventilátory' },
-          { value: 'central', label: 'Centrální klimatizace' },
-          { value: 'other', label: 'Jiné' }
+          { value: 'ac-portable-ac', label: 'Mobilní klimatizace', icon: 'Move' },
+          { value: 'ac-split-ac', label: 'Split jednotky', icon: 'SplitSquareVertical' },
+          { value: 'ac-fans', label: 'Ventilátory', icon: 'Fan' },
+          { value: 'ac-central-ac', label: 'Centrální klimatizace', icon: 'Layout' },
+          { value: 'ac-evaporative', label: 'Evaporativní chlazení', icon: 'Droplets' },
+          { value: 'ac-other-cooling', label: 'Jiné', icon: 'HelpCircle' }
         ]
       },
       {
@@ -449,13 +590,33 @@ export const vyberklimuSteps: WizardStep[] = [
         group: 'existing-cooling',
         conditional: {
           dependsOn: 'hasCooling',
-          values: ['yes']
+          values: ['ac-yes']
         },
         options: [
-          { value: '0-2', label: '0-2 roky' },
-          { value: '3-5', label: '3-5 let' },
-          { value: '6-10', label: '6-10 let' },
-          { value: '10+', label: 'Více než 10 let' }
+          { value: 'ac-age-0-2', label: '0-2 roky' },
+          { value: 'ac-age-3-5', label: '3-5 let' },
+          { value: 'ac-age-6-10', label: '6-10 let' },
+          { value: 'ac-age-10+', label: 'Více než 10 let' }
+        ]
+      },
+      {
+        id: 'coolingProblems',
+        type: 'multiselect',
+        label: 'Problémy se stávajícím chlazením',
+        required: false,
+        icon: 'AlertTriangle',
+        group: 'existing-cooling',
+        conditional: {
+          dependsOn: 'hasCooling',
+          values: ['ac-yes']
+        },
+        options: [
+          { value: 'ac-insufficient-cooling', label: 'Nedostatečné chlazení', icon: 'Thermometer' },
+          { value: 'ac-high-consumption', label: 'Vysoká spotřeba energie', icon: 'Zap' },
+          { value: 'ac-noise', label: 'Hluk', icon: 'Volume2' },
+          { value: 'ac-frequent-breakdowns', label: 'Časté poruchy', icon: 'AlertCircle' },
+          { value: 'ac-poor-air-quality', label: 'Špatná kvalita vzduchu', icon: 'Wind' },
+          { value: 'ac-uneven-cooling', label: 'Nerovnoměrné chlazení', icon: 'BarChart3' }
         ]
       },
       {
@@ -466,10 +627,10 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'ExternalLink',
         group: 'installation-readiness',
         options: [
-          { value: 'yes', label: 'Ano, mám vhodné místo', icon: 'Check' },
-          { value: 'limited', label: 'Ano, ale s omezeními', icon: 'AlertTriangle' },
-          { value: 'no', label: 'Ne, bude potřeba řešit', icon: 'X' },
-          { value: 'unsure', label: 'Nejsem si jistý/á', icon: 'HelpCircle' }
+          { value: 'ac-space-yes', label: 'Ano, mám vhodné místo', icon: 'Check' },
+          { value: 'ac-space-limited', label: 'Ano, ale s omezeními', icon: 'AlertTriangle' },
+          { value: 'ac-space-no', label: 'Ne, bude potřeba řešit', icon: 'X' },
+          { value: 'ac-space-unsure', label: 'Nejsem si jistý/á', icon: 'HelpCircle' }
         ]
       },
       {
@@ -480,9 +641,9 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'Zap',
         group: 'installation-readiness',
         options: [
-          { value: 'yes', label: 'Ano', icon: 'Check' },
-          { value: 'no', label: 'Ne', icon: 'X' },
-          { value: 'unsure', label: 'Nejsem si jistý/á', icon: 'HelpCircle' }
+          { value: 'ac-electrical-yes', label: 'Ano', icon: 'Check' },
+          { value: 'ac-electrical-no', label: 'Ne', icon: 'X' },
+          { value: 'ac-electrical-unsure', label: 'Nejsem si jistý/á', icon: 'HelpCircle' }
         ]
       },
       {
@@ -497,10 +658,10 @@ export const vyberklimuSteps: WizardStep[] = [
           values: ['tenant']
         },
         options: [
-          { value: 'yes', label: 'Ano, mám povolení', icon: 'Check' },
-          { value: 'pending', label: 'Zatím ne, ale plánuji získat', icon: 'Clock' },
-          { value: 'no', label: 'Ne', icon: 'X' },
-          { value: 'unsure', label: 'Nejsem si jistý/á', icon: 'HelpCircle' }
+          { value: 'ac-permission-yes', label: 'Ano, mám povolení', icon: 'Check' },
+          { value: 'ac-permission-pending', label: 'Zatím ne, ale plánuji získat', icon: 'Clock' },
+          { value: 'ac-permission-no', label: 'Ne', icon: 'X' },
+          { value: 'ac-permission-unsure', label: 'Nejsem si jistý/á', icon: 'HelpCircle' }
         ]
       },
       {
@@ -511,11 +672,11 @@ export const vyberklimuSteps: WizardStep[] = [
         icon: 'Ruler',
         group: 'installation-readiness',
         options: [
-          { value: '0-3', label: 'Do 3 metrů' },
-          { value: '3-5', label: '3-5 metrů' },
-          { value: '5-10', label: '5-10 metrů' },
-          { value: '10+', label: 'Nad 10 metrů' },
-          { value: 'unknown', label: 'Nevím' }
+          { value: 'ac-distance-0-3', label: 'Do 3 metrů' },
+          { value: 'ac-distance-3-5', label: '3-5 metrů' },
+          { value: 'ac-distance-5-10', label: '5-10 metrů' },
+          { value: 'ac-distance-10+', label: 'Nad 10 metrů' },
+          { value: 'ac-distance-unknown', label: 'Nevím' }
         ]
       },
       {
@@ -524,11 +685,11 @@ export const vyberklimuSteps: WizardStep[] = [
         label: 'Máte již připravené průchody pro vedení?',
         required: false,
         icon: 'Aperture',
-        group: 'structural',
+        group: 'structural-details',
         options: [
-          { value: 'yes', label: 'Ano', icon: 'Check' },
-          { value: 'no', label: 'Ne', icon: 'X' },
-          { value: 'partial', label: 'Částečně', icon: 'AlertTriangle' }
+          { value: 'ac-openings-yes', label: 'Ano', icon: 'Check' },
+          { value: 'ac-openings-no', label: 'Ne', icon: 'X' },
+          { value: 'ac-openings-partial', label: 'Částečně', icon: 'AlertTriangle' }
         ]
       },
       {
@@ -537,11 +698,1946 @@ export const vyberklimuSteps: WizardStep[] = [
         label: 'Plánujete v blízké době rekonstrukci?',
         required: false,
         icon: 'Wrench',
-        group: 'structural',
+        group: 'structural-details',
         options: [
-          { value: 'yes-soon', label: 'Ano, v nejbližších 6 měsících', icon: 'Calendar' },
-          { value: 'yes-later', label: 'Ano, za 6-12 měsíců', icon: 'CalendarClock' },
+          { value: 'ac-reno-soon', label: 'Ano, v nejbližších 6 měsících', icon: 'Calendar' },
+          { value: 'ac-reno-later', label: 'Ano, za 6-12 měsíců', icon: 'CalendarClock' },
+          { value: 'ac-reno-no', label: 'Ne', icon: 'X' }
+        ]
+      },
+      {
+        id: 'buildingRestrictions',
+        type: 'multiselect',
+        label: 'Stavební omezení',
+        required: false,
+        icon: 'Shield',
+        group: 'structural-details',
+        options: [
+          { value: 'ac-historic-building', label: 'Historická budova', icon: 'Landmark' },
+          { value: 'ac-facade-restrictions', label: 'Omezení na fasádu', icon: 'Square' },
+          { value: 'ac-roof-restrictions', label: 'Omezení na střechu', icon: 'Triangle' },
+          { value: 'ac-noise-restrictions', label: 'Hlukové omezení', icon: 'Volume1' },
+          { value: 'ac-no-restrictions', label: 'Žádná omezení', icon: 'Check' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'energy-consumption',
+    title: 'Energetická spotřeba',
+    description: 'Informace o současné spotřebě elektřiny',
+    icon: 'BarChart3',
+    groups: [
+      {
+        id: 'consumption-basic',
+        title: 'Základní spotřeba',
+        icon: 'Zap',
+        fields: ['annualConsumption', 'annualElectricityCost']
+      },
+      {
+        id: 'consumption-profile',
+        title: 'Profil spotřeby',
+        icon: 'Clock',
+        fields: ['dailyProfile', 'seasonalProfile']
+      },
+      {
+        id: 'heating',
+        title: 'Vytápění',
+        icon: 'Thermometer',
+        fields: ['heating']
+      }
+    ],
+    fields: [
+      {
+        id: 'annualConsumption',
+        type: 'select',
+        label: 'Jakou máte roční spotřebu elektřiny?',
+        required: true,
+        icon: 'Zap',
+        group: 'consumption-basic',
+        note: 'Najdете na vyúčtování elektřiny za poslední rok',
+        options: [
+          // Family house options
+          { 
+            value: '0-4000', 
+            label: '0 - 4 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '4000-8000', 
+            label: '4 000 - 8 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '8000-10000', 
+            label: '8 000 - 10 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '10000-14000', 
+            label: '10 000 - 14 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '15000+', 
+            label: '15 000+ kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          // Apartment building options
+          { 
+            value: '0-30000', 
+            label: '0 - 30 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '30000-80000', 
+            label: '30 000 - 80 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '80000-150000', 
+            label: '80 000 - 150 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '150000-300000', 
+            label: '150 000 - 300 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '300000+', 
+            label: '300 000+ kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          // Commercial options
+          { 
+            value: '0-20000', 
+            label: '0 - 20 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '20000-50000', 
+            label: '20 000 - 50 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '50000-100000', 
+            label: '50 000 - 100 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '100000-200000', 
+            label: '100 000 - 200 000 kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '200000+', 
+            label: '200 000+ kWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          // Industrial options
+          { 
+            value: '0-100', 
+            label: '0 - 100 MWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '100-500', 
+            label: '100 - 500 MWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '500-1000', 
+            label: '500 - 1 000 MWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '1000-5000', 
+            label: '1 000 - 5 000 MWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '5000+', 
+            label: '5 000+ MWh',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          }
+        ]
+      },
+      {
+        id: 'annualElectricityCost',
+        type: 'select',
+        label: 'Kolik ročně zaplatíte za elektřinu?',
+        required: true,
+        icon: 'CreditCard',
+        group: 'consumption-basic',
+        options: [
+          // Family house options
+          { 
+            value: '5000-10000', 
+            label: '5 000 - 10 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '10000-15000', 
+            label: '10 000 - 15 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '15000-20000', 
+            label: '15 000 - 20 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '20000-30000', 
+            label: '20 000 - 30 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '30000-40000', 
+            label: '30 000 - 40 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '40000-50000', 
+            label: '40 000 - 50 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: '50000+', 
+            label: 'Nad 50 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          // Apartment building options
+          { 
+            value: '0-50000', 
+            label: '0 - 50 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '50000-150000', 
+            label: '50 000 - 150 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '150000-300000', 
+            label: '150 000 - 300 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '300000-600000', 
+            label: '300 000 - 600 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '600000-1000000', 
+            label: '600 000 - 1 000 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: '1000000+', 
+            label: 'Nad 1 000 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          // Commercial options
+          { 
+            value: '0-50000', 
+            label: '0 - 50 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '50000-150000', 
+            label: '50 000 - 150 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '150000-300000', 
+            label: '150 000 - 300 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '300000-600000', 
+            label: '300 000 - 600 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '600000-1000000', 
+            label: '600 000 - 1 000 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: '1000000+', 
+            label: 'Nad 1 000 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          // Industrial options
+          { 
+            value: '0-100000', 
+            label: '0 - 100 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '100000-500000', 
+            label: '100 000 - 500 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '500000-2000000', 
+            label: '500 000 - 2 000 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '2000000-10000000', 
+            label: '2 000 000 - 10 000 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '10000000-40000000', 
+            label: '10 000 000 - 40 000 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '40000000+', 
+            label: 'Nad 40 000 000 Kč',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          }
+        ]
+      },
+      {
+        id: 'dailyProfile',
+        type: 'select',
+        label: 'Jak během dne nejčastěji spotřebováváte elektřinu?',
+        required: true,
+        icon: 'Clock',
+        group: 'consumption-profile',
+        options: [
+          // Family house and apartment building options
+          { 
+            value: 'morning', 
+            label: 'Nejvíce ráno (6-10h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house', 'apartment-building']
+            }
+          },
+          { 
+            value: 'day', 
+            label: 'Nejvíce přes den (10-16h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house', 'apartment-building']
+            }
+          },
+          { 
+            value: 'evening', 
+            label: 'Nejvíce večer (16-22h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house', 'apartment-building']
+            }
+          },
+          { 
+            value: 'night', 
+            label: 'Nejvíce v noci (22-6h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house', 'apartment-building']
+            }
+          },
+          { 
+            value: 'uniform', 
+            label: 'Rovnoměrně celý den',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house', 'apartment-building']
+            }
+          },
+          { 
+            value: 'unsure', 
+            label: 'Nejsem si jistý',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house', 'apartment-building']
+            }
+          },
+          // Commercial options
+          { 
+            value: 'morning', 
+            label: 'Nejvíce ráno (6-10h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'day', 
+            label: 'Nejvíce přes den (10-16h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'evening', 
+            label: 'Nejvíce večer (16-22h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'business-hours', 
+            label: 'Pouze pracovní doba (8-17h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'uniform', 
+            label: 'Rovnoměrně celý den',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'unsure', 
+            label: 'Nejsem si jistý',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          // Industrial options
+          { 
+            value: 'morning', 
+            label: 'Nejvíce ráno (6-10h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'day', 
+            label: 'Nejvíce přes den (10-16h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'evening', 
+            label: 'Nejvíce večer (16-22h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'business-hours', 
+            label: 'Pouze pracovní doba (8-17h)',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: '24-7', 
+            label: 'Nepřetržitý provoz 24/7',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'unsure', 
+            label: 'Nejsem si jistý',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          }
+        ]
+      },
+      {
+        id: 'seasonalProfile',
+        type: 'select',
+        label: 'Kdy máte během roku největší spotřebu?',
+        required: true,
+        icon: 'Calendar',
+        group: 'consumption-profile',
+        options: [
+          { value: 'winter-high', label: 'Nejvíce v zimě' },
+          { value: 'summer-high', label: 'Nejvíce v létě' },
+          { value: 'spring-autumn-high', label: 'Nejvíce na jaře/na podzim' },
+          { value: 'uniform', label: 'Rovnoměrně po celý rok' },
+          { value: 'unsure', label: 'Nejsem si jistý' }
+        ]
+      },
+      {
+        id: 'heating',
+        type: 'multiselect',
+        label: 'Aktuální způsob vytápění (objektu)',
+        required: true,
+        icon: 'Flame',
+        group: 'heating',
+        options: [
+          { value: 'electricity', label: 'Elektřina (přímotopy, akumulace)', icon: 'Zap' },
+          { value: 'gas', label: 'Plyn', icon: 'Flame' },
+          { value: 'heat-pump', label: 'Tepelné čerpadlo', icon: 'Wind' },
+          { value: 'solid-fuel', label: 'Tuhá paliva (dřevo, uhlí)', icon: 'TreePine' },
+          { value: 'district-heating', label: 'Dálkové vytápění', icon: 'Building' },
+          { 
+            value: 'central-heating', 
+            label: 'Centrální vytápění', 
+            icon: 'Building',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building', 'commercial', 'industrial']
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'appliances',
+    title: 'Elektrické spotřebiče',
+    description: 'Spotřebiče náročné na elektrickou energii',
+    icon: 'Plug',
+    groups: [
+      {
+        id: 'current-appliances',
+        title: 'Současné spotřebiče',
+        icon: 'Plug',
+        fields: ['currentAppliances', 'poolHeatPump', 'currentPoolType', 'electricCarType', 'airConditioningCount', 'airConditioningBuildingUnits', 'commercialUnitsCount', 'generatorType', 'generatorBatteryCapacity']
+      },
+      {
+        id: 'future-appliances',
+        title: 'Budoucí plány',
+        icon: 'Calendar',
+        fields: ['futureAppliances', 'futureHeatPumpPower', 'futureElectricCarType', 'futurePoolDetails', 'futureAirConditioningDetails', 'futureCommercialAirConditioningCount', 'futureAirConditioningApartmentDetails']
+      }
+    ],
+    fields: [
+      {
+        id: 'currentAppliances',
+        type: 'multiselect',
+        label: 'Současné elektrické spotřebiče',
+        required: true,
+        icon: 'Plug',
+        group: 'current-appliances',
+        options: [
+          // Family house options
+          { 
+            value: 'electric-heating', 
+            label: 'Elektrické vytápění', 
+            icon: 'Zap',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'heat-pump', 
+            label: 'Tepelné čerpadlo', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'electric-boiler', 
+            label: 'Elektrický bojler', 
+            icon: 'Droplets',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'electric-stove', 
+            label: 'Elektrický sporák (indukce)', 
+            icon: 'ChefHat',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'washing-machine', 
+            label: 'Pračka', 
+            icon: 'Shirt',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'dishwasher', 
+            label: 'Myčka', 
+            icon: 'Utensils',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'dryer', 
+            label: 'Sušička', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'air-conditioning', 
+            label: 'Klimatizace', 
+            icon: 'Snowflake',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'pool', 
+            label: 'Bazén', 
+            icon: 'Waves',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'sauna', 
+            label: 'Sauna', 
+            icon: 'Thermometer',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'electric-car', 
+            label: 'Elektromobil', 
+            icon: 'Car',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'wallbox', 
+            label: 'Wallbox', 
+            icon: 'Zap',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'workshop', 
+            label: 'Dílna/garáž', 
+            icon: 'Wrench',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'garden-pump', 
+            label: 'Zahradní čerpadla', 
+            icon: 'Droplets',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'ventilation', 
+            label: 'Rekuperace', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'generator', 
+            label: 'Záložní generátor elektřiny', 
+            icon: 'Battery',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'none', 
+            label: 'Žádné náročné spotřebiče', 
+            icon: 'Minus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          // Apartment building options
+          { 
+            value: 'heat-pump', 
+            label: 'Tepelná čerpadla', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'pressure-pumps', 
+            label: 'Čerpadla – tlaková', 
+            icon: 'Gauge',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'fans', 
+            label: 'Ventilátory', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'compressors', 
+            label: 'Kompresory', 
+            icon: 'Settings',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'washing-machine', 
+            label: 'Pračka', 
+            icon: 'Shirt',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'dryer', 
+            label: 'Sušička', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'air-conditioning', 
+            label: 'Klimatizace', 
+            icon: 'Snowflake',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'sauna', 
+            label: 'Sauna', 
+            icon: 'Thermometer',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'pool', 
+            label: 'Bazén', 
+            icon: 'Waves',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'electric-car', 
+            label: 'Nabíjecí stanice pro elektromobily', 
+            icon: 'Car',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'generator', 
+            label: 'Záložní generátor elektřiny', 
+            icon: 'Battery',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'elevator', 
+            label: 'Výtah', 
+            icon: 'ArrowUpDown',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'ventilation', 
+            label: 'Rekuperace', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'none', 
+            label: 'Žádné náročné spotřebiče', 
+            icon: 'Minus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          // Commercial options
+          { 
+            value: 'industrial-cooling', 
+            label: 'Průmyslové chlazení', 
+            icon: 'Snowflake',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'industrial-heating', 
+            label: 'Průmyslové vytápění', 
+            icon: 'Flame',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'heat-pump', 
+            label: 'Tepelná čerpadla', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'elevator', 
+            label: 'Výtah', 
+            icon: 'ArrowUpDown',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'ventilation-systems', 
+            label: 'Vetrací systémy', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'compressors', 
+            label: 'Kompresory', 
+            icon: 'Settings',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'production-machines', 
+            label: 'Výrobní stroje a zařízení', 
+            icon: 'Cog',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'intensive-lighting', 
+            label: 'Náročné osvětlení', 
+            icon: 'Lightbulb',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'server-room', 
+            label: 'Serverovna/IT technika', 
+            icon: 'Server',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'electric-car', 
+            label: 'Nabíjecí stanice pro elektromobily', 
+            icon: 'Car',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'hvac-systems', 
+            label: 'Klimatizační systémy', 
+            icon: 'Thermometer',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'generator', 
+            label: 'Záložní generátor elektřiny', 
+            icon: 'Battery',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'none', 
+            label: 'Žádné náročné spotřebiče', 
+            icon: 'Minus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          // Industrial options
+          { 
+            value: 'heavy-machinery', 
+            label: 'Těžké stroje a výrobní linky', 
+            icon: 'Cog',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'industrial-cooling', 
+            label: 'Průmyslové chlazení', 
+            icon: 'Snowflake',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'industrial-heating', 
+            label: 'Průmyslové vytápění', 
+            icon: 'Flame',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'heat-pump', 
+            label: 'Tepelná čerpadla', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'conveyor-systems', 
+            label: 'Dopravníkové systémy', 
+            icon: 'ArrowRight',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'ventilation-systems', 
+            label: 'Vetrací systémy', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'compressors', 
+            label: 'Kompresory', 
+            icon: 'Settings',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'intensive-lighting', 
+            label: 'Průmyslové osvětlení', 
+            icon: 'Lightbulb',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'electric-car', 
+            label: 'Nabíjecí stanice pro elektromobily', 
+            icon: 'Car',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'generator', 
+            label: 'Záložní generátor elektřiny', 
+            icon: 'Battery',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'none', 
+            label: 'Žádné náročné spotřebiče', 
+            icon: 'Minus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          }
+        ]
+      },
+      {
+        id: 'poolHeatPump',
+        type: 'radio',
+        label: 'Máte tepelné čerpadlo k bazénu?',
+        required: true,
+        icon: 'Wind',
+        group: 'current-appliances',
+        conditional: {
+          dependsOn: 'currentAppliances',
+          values: ['pool']
+        },
+        options: [
+          { value: 'yes', label: 'Ano', icon: 'Check' },
           { value: 'no', label: 'Ne', icon: 'X' }
+        ]
+      },
+      {
+        id: 'currentPoolType',
+        type: 'select',
+        label: 'Typ současného bazénu',
+        required: true,
+        icon: 'Waves',
+        group: 'current-appliances',
+        conditional: {
+          dependsOn: 'currentAppliances',
+          values: ['pool']
+        },
+        options: [
+          { value: 'small', label: 'Malý bazén (do 20 m³, cca 2x3 m / průměr 3 m)' },
+          { value: 'medium', label: 'Střední bazén (20-50 m³, cca 4x8 m / průměr 5 m)' },
+          { value: 'large', label: 'Velký bazén (nad 50 m³, cca 6x12 m / průměr 8 m)' },
+          { value: 'unknown', label: 'Nejsem si jistý' }
+        ]
+      },
+      {
+        id: 'electricCarType',
+        type: 'select',
+        label: 'Typ elektromobilu',
+        required: true,
+        icon: 'Car',
+        group: 'current-appliances',
+        conditional: {
+          dependsOn: 'currentAppliances',
+          values: ['electric-car'],
+          and: [{
+            dependsOn: 'propertyType',
+            values: ['family-house']
+          }]
+        },
+        options: [
+          { value: 'small', label: 'Malý vůz (do 40 kWh baterie)' },
+          { value: 'medium', label: 'Střední vůz (40-70 kWh baterie)' },
+          { value: 'large', label: 'Velký vůz (nad 70 kWh baterie)' },
+          { value: 'multiple', label: 'Více vozidel' }
+        ]
+      },
+      {
+        id: 'airConditioningCount',
+        type: 'select',
+        label: 'Počet klimatizačních jednotek',
+        required: true,
+        icon: 'Snowflake',
+        group: 'current-appliances',
+        conditional: {
+          dependsOn: 'currentAppliances',
+          values: ['air-conditioning'],
+          and: [{
+            dependsOn: 'propertyType',
+            values: ['family-house']
+          }]
+        },
+        options: [
+          { value: '1', label: '1 jednotka' },
+          { value: '2-3', label: '2-3 jednotky' },
+          { value: '3+', label: '3+ jednotek' }
+        ]
+      },
+      {
+        id: 'airConditioningBuildingUnits',
+        type: 'radio',
+        label: 'Kde jsou umístěné klimatizační jednotky?',
+        required: true,
+        icon: 'Snowflake',
+        group: 'current-appliances',
+        conditional: {
+          dependsOn: 'currentAppliances',
+          values: ['air-conditioning'],
+          and: [{
+            dependsOn: 'propertyType',
+            values: ['apartment-building']
+          }]
+        },
+        options: [
+          { value: 'common-areas', label: 'Pouze společné prostory' },
+          { value: 'each-unit', label: 'Každá bytová jednotka' },
+          { value: 'individual', label: 'Řešeno individuálně' }
+        ]
+      },
+      {
+        id: 'commercialUnitsCount',
+        type: 'select',
+        label: 'Kolik klimatizačních jednotek se nachází v objektu?',
+        required: true,
+        icon: 'Building',
+        group: 'current-appliances',
+        conditional: {
+          dependsOn: 'currentAppliances',
+          values: ['hvac-systems'],
+          and: [{
+            dependsOn: 'propertyType',
+            values: ['commercial']
+          }]
+        },
+        options: [
+          { value: '1-5', label: '1-5 jednotek' },
+          { value: '6-10', label: '6-10 jednotek' },
+          { value: '11-25', label: '11-25 jednotek' },
+          { value: '25+', label: '25+ jednotek' }
+        ]
+      },
+      {
+        id: 'generatorType',
+        type: 'select',
+        label: 'Typ záložního generátoru',
+        required: true,
+        icon: 'Fuel',
+        group: 'current-appliances',
+        conditional: {
+          dependsOn: 'currentAppliances',
+          values: ['generator']
+        },
+        options: [
+          { value: 'gasoline', label: 'Benzín/nafta' },
+          { value: 'gas', label: 'Plyn' },
+          { value: 'battery', label: 'Baterie' }
+        ]
+      },
+      {
+        id: 'generatorBatteryCapacity',
+        type: 'select',
+        label: 'Kapacita bateriového generátoru',
+        required: true,
+        icon: 'Battery',
+        group: 'current-appliances',
+        conditional: {
+          dependsOn: 'generatorType',
+          values: ['battery']
+        },
+        options: [
+          { value: 'under-5', label: 'Do 5 kWh' },
+          { value: '5-10', label: '5-10 kWh' },
+          { value: '10+', label: '10+ kWh' }
+        ]
+      },
+      {
+        id: 'futureAppliances',
+        type: 'multiselect',
+        label: 'Plánované budoucí změny (do 5 let)',
+        required: true,
+        icon: 'Calendar',
+        group: 'future-appliances',
+        options: [
+          // Family house options
+          { 
+            value: 'electric-car', 
+            label: 'Elektromobil', 
+            icon: 'Car',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'heat-pump', 
+            label: 'Tepelné čerpadlo', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'pool', 
+            label: 'Bazén', 
+            icon: 'Waves',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'pool-heat-pump', 
+            label: 'Tepelné čerpadlo k bazénu', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'currentAppliances',
+              values: ['pool'],
+              and: [{
+                dependsOn: 'poolHeatPump',
+                values: ['no']
+              }, {
+                dependsOn: 'propertyType',
+                values: ['family-house']
+              }]
+            }
+          },
+          { 
+            value: 'air-conditioning', 
+            label: 'Klimatizace', 
+            icon: 'Snowflake',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'expansion', 
+            label: 'Rozšíření objektu', 
+            icon: 'Plus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'workshop', 
+            label: 'Dílna/garáž', 
+            icon: 'Wrench',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'washing-machine', 
+            label: 'Pračka', 
+            icon: 'Shirt',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'dishwasher', 
+            label: 'Myčka', 
+            icon: 'Utensils',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'dryer', 
+            label: 'Sušička', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'electric-stove', 
+            label: 'Elektrický sporák (indukce)', 
+            icon: 'ChefHat',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'wallbox', 
+            label: 'Wallbox', 
+            icon: 'Zap',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'ventilation', 
+            label: 'Rekuperace', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'generator', 
+            label: 'Záložní generátor elektřiny', 
+            icon: 'Battery',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          { 
+            value: 'none', 
+            label: 'Žádné změny', 
+            icon: 'Minus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['family-house']
+            }
+          },
+          // Apartment building options
+          { 
+            value: 'heat-pump', 
+            label: 'Tepelná čerpadla', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'pressure-pumps', 
+            label: 'Čerpadla – tlaková', 
+            icon: 'Gauge',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'fans', 
+            label: 'Ventilátory', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'compressors', 
+            label: 'Kompresory', 
+            icon: 'Settings',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'washing-machine', 
+            label: 'Pračka', 
+            icon: 'Shirt',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'dryer', 
+            label: 'Sušička', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'air-conditioning', 
+            label: 'Klimatizace', 
+            icon: 'Snowflake',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'sauna', 
+            label: 'Sauna', 
+            icon: 'Thermometer',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'pool', 
+            label: 'Bazén', 
+            icon: 'Waves',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'electric-car', 
+            label: 'Nabíjecí stanice pro elektromobily', 
+            icon: 'Car',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'generator', 
+            label: 'Záložní generátor elektřiny', 
+            icon: 'Battery',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'elevator', 
+            label: 'Výtah', 
+            icon: 'ArrowUpDown',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'ventilation', 
+            label: 'Rekuperace', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          { 
+            value: 'none', 
+            label: 'Žádné změny', 
+            icon: 'Minus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['apartment-building']
+            }
+          },
+          // Commercial options
+          { 
+            value: 'industrial-cooling', 
+            label: 'Průmyslové chlazení', 
+            icon: 'Snowflake',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'industrial-heating', 
+            label: 'Průmyslové vytápění', 
+            icon: 'Flame',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'heat-pump', 
+            label: 'Tepelná čerpadla', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'elevator', 
+            label: 'Výtah', 
+            icon: 'ArrowUpDown',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'ventilation-systems', 
+            label: 'Vetrací systémy', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'compressors', 
+            label: 'Kompresory', 
+            icon: 'Settings',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'production-machines', 
+            label: 'Výrobní stroje a zařízení', 
+            icon: 'Cog',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'intensive-lighting', 
+            label: 'Náročné osvětlení', 
+            icon: 'Lightbulb',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'server-room', 
+            label: 'Serverovna/IT technika', 
+            icon: 'Server',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'electric-car', 
+            label: 'Nabíjecí stanice pro elektromobily', 
+            icon: 'Car',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'hvac-systems', 
+            label: 'Klimatizační systémy', 
+            icon: 'Thermometer',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'generator', 
+            label: 'Záložní generátor elektřiny', 
+            icon: 'Battery',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          { 
+            value: 'none', 
+            label: 'Žádné změny', 
+            icon: 'Minus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['commercial']
+            }
+          },
+          // Industrial options
+          { 
+            value: 'heavy-machinery', 
+            label: 'Těžké stroje a výrobní linky', 
+            icon: 'Cog',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'industrial-cooling', 
+            label: 'Průmyslové chlazení', 
+            icon: 'Snowflake',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'industrial-heating', 
+            label: 'Průmyslové vytápění', 
+            icon: 'Flame',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'heat-pump', 
+            label: 'Tepelná čerpadla', 
+            icon: 'Wind',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'conveyor-systems', 
+            label: 'Dopravníkové systémy', 
+            icon: 'ArrowRight',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'ventilation-systems', 
+            label: 'Vetrací systémy', 
+            icon: 'Fan',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'compressors', 
+            label: 'Kompresory', 
+            icon: 'Settings',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'intensive-lighting', 
+            label: 'Průmyslové osvětlení', 
+            icon: 'Lightbulb',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'electric-car', 
+            label: 'Nabíjecí stanice pro elektromobily', 
+            icon: 'Car',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'generator', 
+            label: 'Záložní generátor elektřiny', 
+            icon: 'Battery',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          },
+          { 
+            value: 'none', 
+            label: 'Žádné změny', 
+            icon: 'Minus',
+            conditional: {
+              dependsOn: 'propertyType',
+              values: ['industrial']
+            }
+          }
+        ]
+      },
+      {
+        id: 'futureHeatPumpPower',
+        type: 'select',
+        label: 'Plánovaný výkon tepelných čerpadel',
+        required: true,
+        icon: 'Zap',
+        group: 'future-appliances',
+        conditional: {
+          dependsOn: 'futureAppliances',
+          values: ['heat-pump']
+        },
+        options: [
+          { value: '3-6', label: '3-6 kW' },
+          { value: '6-9', label: '6-9 kW' },
+          { value: '9-12', label: '9-12 kW' },
+          { value: '12-16', label: '12-16 kW' },
+          { value: '16-20', label: '16-20 kW' },
+          { value: '20+', label: 'Nad 20 kW' }
+        ]
+      },
+      {
+        id: 'futureElectricCarType',
+        type: 'select',
+        label: 'Typ plánovaného elektromobilu',
+        required: true,
+        icon: 'Car',
+        group: 'future-appliances',
+        conditional: {
+          dependsOn: 'futureAppliances',
+          values: ['electric-car'],
+          and: [{
+            dependsOn: 'propertyType',
+            values: ['family-house']
+          }]
+        },
+        options: [
+          { value: 'small', label: 'Malý vůz (do 40 kWh baterie)' },
+          { value: 'medium', label: 'Střední vůz (40-70 kWh baterie)' },
+          { value: 'large', label: 'Velký vůz (nad 70 kWh baterie)' },
+          { value: 'multiple', label: 'Více vozidel' }
+        ]
+      },
+      {
+        id: 'futurePoolDetails',
+        type: 'select',
+        label: 'Typ plánovaného bazénu',
+        required: true,
+        icon: 'Waves',
+        group: 'future-appliances',
+        conditional: {
+          dependsOn: 'futureAppliances',
+          values: ['pool']
+        },
+        options: [
+          { value: 'small', label: 'Malý bazén (do 20 m³, cca 2x3 m / průměr 3 m)' },
+          { value: 'medium', label: 'Střední bazén (20-50 m³, cca 4x8 m / průměr 5 m)' },
+          { value: 'large', label: 'Velký bazén (nad 50 m³, cca 6x12 m / průměr 8 m)' },
+          { value: 'unknown', label: 'Nejsem si jistý' }
+        ]
+      },
+      {
+        id: 'futureAirConditioningDetails',
+        type: 'select',
+        label: 'Očekávaný rozsah klimatizace',
+        required: true,
+        icon: 'Snowflake',
+        group: 'future-appliances',
+        conditional: {
+          dependsOn: 'futureAppliances',
+          values: ['air-conditioning'],
+          and: [{
+            dependsOn: 'propertyType',
+            values: ['family-house', 'industrial']
+          }]
+        },
+        options: [
+          { value: '1', label: '1 jednotka' },
+          { value: '2-3', label: '2-3 jednotky' },
+          { value: '3+', label: '3+ jednotek' }
+        ]
+      },
+      {
+        id: 'futureCommercialAirConditioningCount',
+        type: 'select',
+        label: 'Plánovaný počet klimatizací v objektu?',
+        required: true,
+        icon: 'Snowflake',
+        group: 'future-appliances',
+        conditional: {
+          dependsOn: 'futureAppliances',
+          values: ['hvac-systems'],
+          and: [{
+            dependsOn: 'propertyType',
+            values: ['commercial']
+          }]
+        },
+        options: [
+          { value: '1-5', label: '1-5 jednotek' },
+          { value: '6-10', label: '6-10 jednotek' },
+          { value: '11-25', label: '11-25 jednotek' },
+          { value: '25+', label: '25+ jednotek' }
+        ]
+      },
+      {
+        id: 'futureAirConditioningApartmentDetails',
+        type: 'select',
+        label: 'Pro jaké účely plánujete klimatizaci?',
+        required: true,
+        icon: 'Snowflake',
+        group: 'future-appliances',
+        conditional: {
+          dependsOn: 'futureAppliances',
+          values: ['air-conditioning'],
+          and: [{
+            dependsOn: 'propertyType',
+            values: ['apartment-building']
+          }]
+        },
+        options: [
+          { value: 'common-areas', label: 'Pro společné prostory' },
+          { value: 'each-unit', label: 'Pro každou bytovou jednotku' },
+          { value: 'unknown', label: 'Zatím nevíme' }
         ]
       }
     ]
@@ -553,16 +2649,16 @@ export const vyberklimuSteps: WizardStep[] = [
     icon: 'Banknote',
     groups: [
       {
-        id: 'budget',
-        title: 'Rozpočet',
+        id: 'financial-aspects',
+        title: 'Finanční aspekty',
         icon: 'Banknote',
         fields: ['budget', 'financing']
       },
       {
-        id: 'timeline',
-        title: 'Časování',
+        id: 'project-timeline',
+        title: 'Časování projektu',
         icon: 'Calendar',
-        fields: ['installationTime', 'preferredContactMethod', 'preferredContactTime']
+        fields: ['installationTiming', 'preferredContactMethod', 'preferredContactTime']
       }
     ],
     fields: [
@@ -572,43 +2668,44 @@ export const vyberklimuSteps: WizardStep[] = [
         label: 'Předpokládaný rozpočet na klimatizaci',
         required: true,
         icon: 'Banknote',
-        group: 'budget',
+        group: 'financial-aspects',
         options: [
-          { value: 'under-30k', label: 'Do 30 000 Kč' },
-          { value: '30k-50k', label: '30 000 - 50 000 Kč' },
-          { value: '50k-80k', label: '50 000 - 80 000 Kč' },
-          { value: '80k-120k', label: '80 000 - 120 000 Kč' },
-          { value: 'over-120k', label: 'Nad 120 000 Kč' },
-          { value: 'not-set', label: 'Nemám stanovený rozpočet' }
+          { value: 'ac-under-30k', label: 'Do 30 000 Kč' },
+          { value: 'ac-30k-50k', label: '30 000 - 50 000 Kč' },
+          { value: 'ac-50k-80k', label: '50 000 - 80 000 Kč' },
+          { value: 'ac-80k-120k', label: '80 000 - 120 000 Kč' },
+          { value: 'ac-120k-200k', label: '120 000 - 200 000 Kč' },
+          { value: 'ac-over-200k', label: 'Nad 200 000 Kč' },
+          { value: 'ac-not-set', label: 'Nemám stanovený rozpočet' }
         ]
       },
       {
         id: 'financing',
         type: 'radio',
         label: 'Způsob financování',
-        required: false,
+        required: true,
         icon: 'CreditCard',
-        group: 'budget',
+        group: 'financial-aspects',
         options: [
-          { value: 'cash', label: 'Hotovost / vlastní prostředky', icon: 'Banknote' },
-          { value: 'loan', label: 'Úvěr / leasing', icon: 'CreditCard' },
-          { value: 'installments', label: 'Splátkový prodej', icon: 'Calendar' },
-          { value: 'undecided', label: 'Ještě nevím', icon: 'HelpCircle' }
+          { value: 'cash', label: 'Hotovost/vlastní prostředky', icon: 'Banknote' },
+          { value: 'loan', label: 'Úvěr/leasing', icon: 'CreditCard' },
+          { value: 'ac-installments', label: 'Splátkový prodej', icon: 'Calendar' },
+          { value: 'ac-undecided', label: 'Ještě nevím', icon: 'HelpCircle' }
         ]
       },
       {
-        id: 'installationTime',
+        id: 'installationTiming',
         type: 'radio',
         label: 'Kdy plánujete realizaci?',
         required: true,
         icon: 'Calendar',
-        group: 'timeline',
+        group: 'project-timeline',
         options: [
           { value: 'asap', label: 'Co nejdříve', icon: 'Zap' },
           { value: '1-3months', label: 'Během 1-3 měsíců', icon: 'CalendarCheck' },
           { value: '3-6months', label: 'Za 3-6 měsíců', icon: 'CalendarClock' },
-          { value: '6+months', label: 'Za více než 6 měsíců', icon: 'CalendarDays' },
-          { value: 'just-info', label: 'Jen zjišťuji informace', icon: 'Search' }
+          { value: 'ac-6+months', label: 'Za více než 6 měsíců', icon: 'CalendarDays' },
+          { value: 'ac-just-info', label: 'Jen zjišťuji informace', icon: 'Search' }
         ]
       },
       {
@@ -617,21 +2714,21 @@ export const vyberklimuSteps: WizardStep[] = [
         label: 'Preferovaný způsob kontaktu',
         required: true,
         icon: 'MessageCircle',
-        group: 'timeline',
+        group: 'project-timeline',
         options: [
           { value: 'phone', label: 'Telefon', icon: 'Phone' },
           { value: 'email', label: 'E-mail', icon: 'Mail' },
           { value: 'both', label: 'Telefon i e-mail', icon: 'Users' },
-          { value: 'none', label: 'Nechci být kontaktován/a', icon: 'X' }
+          { value: 'research-only', label: 'Nechci být kontaktován/a', icon: 'X' }
         ]
       },
       {
         id: 'preferredContactTime',
         type: 'multiselect',
         label: 'Preferovaný čas pro kontakt',
-        required: false,
+        required: true,
         icon: 'Clock',
-        group: 'timeline',
+        group: 'project-timeline',
         conditional: {
           dependsOn: 'preferredContactMethod',
           values: ['phone', 'both']
@@ -646,21 +2743,21 @@ export const vyberklimuSteps: WizardStep[] = [
     ]
   },
   {
-    id: 'additional-info',
-    title: 'Doplňující informace',
-    description: 'Další informace pro přesnější nabídku',
-    icon: 'FileText',
+    id: 'documents-notes',
+    title: 'Dokumenty a poznámky',
+    description: 'Nahrajte relevantní dokumenty a přidejte poznámky pro přesnější nabídku',
+    icon: 'Upload',
     groups: [
       {
-        id: 'photos',
+        id: 'attachments',
         title: 'Fotografie a plány',
         icon: 'Camera',
         fields: ['photos', 'buildingPlans']
       },
       {
-        id: 'notes',
-        title: 'Poznámky a požadavky',
-        icon: 'FileText',
+        id: 'additional-info',
+        title: 'Poznámky a speciální požadavky',
+        icon: 'MessageSquare',
         fields: ['notes', 'additionalRequirements']
       }
     ],
@@ -672,7 +2769,7 @@ export const vyberklimuSteps: WizardStep[] = [
         placeholder: 'Přidejte fotografie místností pro lepší návrh řešení',
         required: false,
         icon: 'Camera',
-        group: 'photos',
+        group: 'attachments',
         note: 'Fotografie nám pomohou lépe navrhnout umístění jednotek klimatizace'
       },
       {
@@ -682,17 +2779,17 @@ export const vyberklimuSteps: WizardStep[] = [
         placeholder: 'Přidejte půdorys nebo plány budovy, pokud jsou k dispozici',
         required: false,
         icon: 'FileText',
-        group: 'photos',
+        group: 'attachments',
         note: 'Půdorysy pomáhají při návrhu optimálního umístění jednotek a vedení'
       },
       {
         id: 'notes',
         type: 'textarea',
-        label: 'Poznámky',
+        label: 'Poznámky a speciální požadavky',
         placeholder: 'Jakékoli další informace, které nám mohou pomoci lépe porozumět vašim požadavkům...',
         required: false,
         icon: 'FileText',
-        group: 'notes'
+        group: 'additional-info'
       },
       {
         id: 'additionalRequirements',
@@ -700,13 +2797,15 @@ export const vyberklimuSteps: WizardStep[] = [
         label: 'Další speciální požadavky',
         required: false,
         icon: 'List',
-        group: 'notes',
+        group: 'additional-info',
         options: [
-          { value: 'design', label: 'Důraz na design jednotek', icon: 'Palette' },
-          { value: 'noise', label: 'Extrémně tichý provoz', icon: 'Volume' },
-          { value: 'allergens', label: 'Filtrace alergenů', icon: 'Flower2' },
-          { value: 'installation', label: 'Rychlá instalace', icon: 'Clock' },
-          { value: 'brand', label: 'Konkrétní značka/výrobce', icon: 'Star' }
+          { value: 'ac-design-focus', label: 'Důraz na design jednotek', icon: 'Palette' },
+          { value: 'ac-ultra-quiet', label: 'Extrémně tichý provoz', icon: 'Volume' },
+          { value: 'ac-allergy-filter', label: 'Filtrace alergenů', icon: 'Flower2' },
+          { value: 'ac-quick-install', label: 'Rychlá instalace', icon: 'Clock' },
+          { value: 'ac-specific-brand', label: 'Konkrétní značka/výrobce', icon: 'Star' },
+          { value: 'ac-maintenance-contract', label: 'Zájem o servisní smlouvu', icon: 'FileCheck' },
+          { value: 'ac-eco-friendly', label: 'Ekologické chladivo', icon: 'Leaf' }
         ]
       }
     ]
@@ -718,6 +2817,12 @@ export const vyberklimuSteps: WizardStep[] = [
     icon: 'CheckCircle',
     groups: [
       {
+        id: 'contact-preferences',
+        title: 'Preference kontaktu',
+        icon: 'Phone',
+        fields: ['contactPreference', 'contactTime']
+      },
+      {
         id: 'consent',
         title: 'Souhlasy',
         icon: 'Shield',
@@ -725,6 +2830,38 @@ export const vyberklimuSteps: WizardStep[] = [
       }
     ],
     fields: [
+      {
+        id: 'contactPreference',
+        type: 'radio',
+        label: 'Preferovaný způsob kontaktu',
+        required: true,
+        icon: 'Phone',
+        group: 'contact-preferences',
+        options: [
+          { value: 'phone', label: 'Telefonicky', icon: 'Phone' },
+          { value: 'email', label: 'E-mailem', icon: 'Mail' },
+          { value: 'both', label: 'Telefonicky i e-mailem', icon: 'MessageCircle' },
+          { value: 'research-only', label: 'Nechci být kontaktován, jen si dělám průzkum', icon: 'Search' }
+        ]
+      },
+      {
+        id: 'contactTime',
+        type: 'multiselect',
+        label: 'Vhodný čas pro kontakt',
+        required: true,
+        icon: 'Clock',
+        group: 'contact-preferences',
+        conditional: {
+          dependsOn: 'contactPreference',
+          values: ['phone', 'both']
+        },
+        options: [
+          { value: 'morning', label: 'Ráno (8-12h)', icon: 'Sunrise' },
+          { value: 'afternoon', label: 'Odpoledne (12-17h)', icon: 'Sun' },
+          { value: 'evening', label: 'Večer (17-20h)', icon: 'Sunset' },
+          { value: 'weekend', label: 'Víkend', icon: 'Calendar' }
+        ]
+      },
       {
         id: 'gdprConsent',
         type: 'checkbox',
@@ -749,16 +2886,16 @@ export const vyberklimuSteps: WizardStep[] = [
 
 // Definice kompletního průvodce pro výběr klimatizace
 export const vyberklimuWizard: Wizard = {
-  id: 'vyberklima',
+  id: 'vyberklimu',
   name: 'Průvodce výběrem klimatizace',
   description: 'Interaktivní průvodce pro výběr klimatizace. Získejte nabídku na míru během několika minut.',
   category: 'Vzduchotechnika',
   steps: vyberklimuSteps,
   settings: {
     theme: {
-      primaryColor: '#0891b2', // Tyrkysová barva pro klimatizaci (teal-600)
-      secondaryColor: '#0e7490', // Tmavší tyrkysová (teal-700)
-      accentColor: '#06b6d4', // Světlejší tyrkysová (teal-500)
+      primaryColor: '#0891b2',
+      secondaryColor: '#0e7490',
+      accentColor: '#06b6d4',
       backgroundColor: '#FFFFFF',
       textColor: '#111827',
       fontFamily: 'Inter',
@@ -776,7 +2913,7 @@ export const vyberklimuWizard: Wizard = {
       allowSkipSteps: false,
       autoSave: true,
       requireEmail: true,
-      showBranding: false,
+      showBranding: true,
       stepTransition: 'slide',
     },
     completion: {
@@ -790,7 +2927,7 @@ export const vyberklimuWizard: Wizard = {
       allowCustomization: true,
     },
     integrations: {
-      mapyApiKey: 'vCdbERKNLmfB7W-gZ1LgJyP2Ou0UnXeR1NhQxB1RclU', // Aktualizováno s platným API klíčem
+      mapyApiKey: 'vCdbERKNLmfB7W-gZ1LgJyP2Ou0UnXeR1NhQxB1RclU',
     },
   }
 };

@@ -104,6 +104,464 @@ export const getFieldDisplayValue = (fieldId: string, value: any): string => {
     'flexible': 'Jsem flexibilní'
   };
 
+  // Mapování pro klimatizace - stáří budovy
+  const acBuildingAgeLabels: { [key: string]: string } = {
+    'ac-new': 'Novostavba (do 5 let)',
+    'ac-recent': '5-15 let',
+    'ac-older': '15-30 let',
+    'ac-old': 'Nad 30 let'
+  };
+
+  // Mapování pro klimatizace - výška stropů
+  const acCeilingHeightLabels: { [key: string]: string } = {
+    'ac-low': 'Nízké (do 2.5m)',
+    'ac-standard': 'Standardní (2.5-3m)',
+    'ac-high': 'Vysoké (nad 3m)'
+  };
+
+  // Mapování pro klimatizace - účel
+  const acPurposeLabels: { [key: string]: string } = {
+    'ac-cooling': 'Pouze chlazení',
+    'ac-cooling-heating': 'Chlazení a vytápění',
+    'ac-all-year': 'Celoroční použití (vytápění i chlazení)'
+  };
+
+  // Mapování pro klimatizace - místnosti
+  const acRoomsLabels: { [key: string]: string } = {
+    'ac-living-room': 'Obývací pokoj',
+    'ac-bedroom': 'Ložnice',
+    'ac-kitchen': 'Kuchyně',
+    'ac-office': 'Pracovna/kancelář',
+    'ac-children-room': 'Dětský pokoj',
+    'ac-hall': 'Chodba/hala',
+    'ac-meeting-room': 'Jednací místnost',
+    'ac-production-area': 'Výrobní prostory',
+    'ac-warehouse': 'Sklad',
+    'ac-server-room': 'Serverovna',
+    'ac-other': 'Jiná místnost'
+  };
+
+  // Mapování pro klimatizace - typ jednotek
+  const acUnitsLabels: { [key: string]: string } = {
+    'ac-split': 'Nástěnné split jednotky (pro jednotlivé místnosti)',
+    'ac-multi-split': 'Multi-split (jedna venkovní, více vnitřních)',
+    'ac-central': 'Centrální klimatizace (rozvody po celém objektu)',
+    'ac-cassette': 'Kazetové jednotky (do podhledů)',
+    'ac-ducted': 'Potrubní jednotky (skryté rozvody)',
+    'ac-portable': 'Mobilní jednotky (bez instalace)',
+    'ac-advice': 'Potřebuji poradit s výběrem'
+  };
+
+  // Mapování pro klimatizace - funkce
+  const acFeaturesLabels: { [key: string]: string } = {
+    'ac-low-noise': 'Tichý provoz',
+    'ac-air-purification': 'Čištění vzduchu / filtrace',
+    'ac-dehumidification': 'Odvlhčování',
+    'ac-wifi': 'WiFi připojení / ovládání aplikací',
+    'ac-energy-efficiency': 'Vysoká energetická účinnost',
+    'ac-design': 'Designové provedení',
+    'ac-inverter': 'Inverter technologie',
+    'ac-heat-recovery': 'Rekuperace tepla'
+  };
+
+  // Mapování pro klimatizace - chytré funkce
+  const acSmartFeaturesLabels: { [key: string]: string } = {
+    'ac-app-control': 'Ovládání přes mobilní aplikaci',
+    'ac-voice-control': 'Hlasové ovládání (Google, Alexa, Siri)',
+    'ac-scheduling': 'Automatické plánování provozu',
+    'ac-presence-detection': 'Detekce přítomnosti osob',
+    'ac-remote-diagnostics': 'Vzdálená diagnostika',
+    'ac-energy-monitoring': 'Monitoring spotřeby energie',
+    'ac-geofencing': 'Geofencing (automatické zapnutí při příchodu)'
+  };
+
+  // Mapování pro klimatizace - energetická třída
+  const acEfficiencyLabels: { [key: string]: string } = {
+    'ac-a+++': 'A+++ (nejvyšší účinnost)',
+    'ac-a++': 'A++',
+    'ac-a+': 'A+',
+    'ac-any': 'Nevím / není důležité'
+  };
+
+  // Mapování pro klimatizace - chladicí výkon
+  const acCoolingPowerLabels: { [key: string]: string } = {
+    'ac-cooling-low': 'Nízký (do 2.5 kW)',
+    'ac-cooling-medium': 'Střední (2.5 - 5 kW)',
+    'ac-cooling-high': 'Vysoký (5 - 10 kW)',
+    'ac-cooling-very-high': 'Velmi vysoký (nad 10 kW)',
+    'ac-cooling-unknown': 'Nevím, potřebuji poradit'
+  };
+
+  // Mapování pro klimatizace - topný výkon
+  const acHeatingPowerLabels: { [key: string]: string } = {
+    'ac-heating-low': 'Nízký (do 3 kW)',
+    'ac-heating-medium': 'Střední (3 - 6 kW)',
+    'ac-heating-high': 'Vysoký (6 - 12 kW)',
+    'ac-heating-very-high': 'Velmi vysoký (nad 12 kW)',
+    'ac-heating-unknown': 'Nevím, potřebuji poradit'
+  };
+
+  // Mapování pro klimatizace - stávající chlazení
+  const hasCoolingLabels: { [key: string]: string } = {
+    'ac-yes': 'Ano',
+    'ac-no': 'Ne'
+  };
+
+  // Mapování pro klimatizace - typ chlazení
+  const coolingTypeLabels: { [key: string]: string } = {
+    'ac-portable-ac': 'Mobilní klimatizace',
+    'ac-split-ac': 'Split jednotky',
+    'ac-fans': 'Ventilátory',
+    'ac-central-ac': 'Centrální klimatizace',
+    'ac-evaporative': 'Evaporativní chlazení',
+    'ac-other-cooling': 'Jiné'
+  };
+
+  // Mapování pro klimatizace - stáří chlazení
+  const coolingAgeLabels: { [key: string]: string } = {
+    'ac-age-0-2': '0-2 roky',
+    'ac-age-3-5': '3-5 let',
+    'ac-age-6-10': '6-10 let',
+    'ac-age-10+': 'Více než 10 let'
+  };
+
+  // Mapování pro klimatizace - problémy s chlazením
+  const coolingProblemsLabels: { [key: string]: string } = {
+    'ac-insufficient-cooling': 'Nedostatečné chlazení',
+    'ac-high-consumption': 'Vysoká spotřeba energie',
+    'ac-noise': 'Hluk',
+    'ac-frequent-breakdowns': 'Časté poruchy',
+    'ac-poor-air-quality': 'Špatná kvalita vzduchu',
+    'ac-uneven-cooling': 'Nerovnoměrné chlazení'
+  };
+
+  // Mapování pro klimatizace - venkovní prostor
+  const hasOutdoorSpaceLabels: { [key: string]: string } = {
+    'ac-space-yes': 'Ano, mám vhodné místo',
+    'ac-space-limited': 'Ano, ale s omezeními',
+    'ac-space-no': 'Ne, bude potřeba řešit',
+    'ac-space-unsure': 'Nejsem si jistý/á'
+  };
+
+  // Mapování pro klimatizace - elektroinstalace
+  const hasElectricalReadinessLabels: { [key: string]: string } = {
+    'ac-electrical-yes': 'Ano',
+    'ac-electrical-no': 'Ne',
+    'ac-electrical-unsure': 'Nejsem si jistý/á'
+  };
+
+  // Mapování pro klimatizace - povolení
+  const hasWallPermissionLabels: { [key: string]: string } = {
+    'ac-permission-yes': 'Ano, mám povolení',
+    'ac-permission-pending': 'Zatím ne, ale plánuji získat',
+    'ac-permission-no': 'Ne',
+    'ac-permission-unsure': 'Nejsem si jistý/á'
+  };
+
+  // Mapování pro klimatizace - vzdálenost jednotek
+  const outdoorUnitDistanceLabels: { [key: string]: string } = {
+    'ac-distance-0-3': 'Do 3 metrů',
+    'ac-distance-3-5': '3-5 metrů',
+    'ac-distance-5-10': '5-10 metrů',
+    'ac-distance-10+': 'Nad 10 metrů',
+    'ac-distance-unknown': 'Nevím'
+  };
+
+  // Mapování pro klimatizace - průchody
+  const hasOpeningsLabels: { [key: string]: string } = {
+    'ac-openings-yes': 'Ano',
+    'ac-openings-no': 'Ne',
+    'ac-openings-partial': 'Částečně'
+  };
+
+  // Mapování pro klimatizace - rekonstrukce
+  const renovationPlansLabels: { [key: string]: string } = {
+    'ac-reno-soon': 'Ano, v nejbližších 6 měsících',
+    'ac-reno-later': 'Ano, za 6-12 měsíců',
+    'ac-reno-no': 'Ne'
+  };
+
+  // Mapování pro klimatizace - stavební omezení
+  const buildingRestrictionsLabels: { [key: string]: string } = {
+    'ac-historic-building': 'Historická budova',
+    'ac-facade-restrictions': 'Omezení na fasádu',
+    'ac-roof-restrictions': 'Omezení na střechu',
+    'ac-noise-restrictions': 'Hlukové omezení',
+    'ac-no-restrictions': 'Žádná omezení'
+  };
+
+  // Mapování pro klimatizace - rozpočet
+  const acBudgetLabels: { [key: string]: string } = {
+    'ac-under-30k': 'Do 30 000 Kč',
+    'ac-30k-50k': '30 000 - 50 000 Kč',
+    'ac-50k-80k': '50 000 - 80 000 Kč',
+    'ac-80k-120k': '80 000 - 120 000 Kč',
+    'ac-120k-200k': '120 000 - 200 000 Kč',
+    'ac-over-200k': 'Nad 200 000 Kč',
+    'ac-not-set': 'Nemám stanovený rozpočet'
+  };
+
+  // Mapování pro klimatizace - časování instalace
+  const acInstallationTimingLabels: { [key: string]: string } = {
+    'ac-6+months': 'Za více než 6 měsíců',
+    'ac-just-info': 'Jen zjišťuji informace'
+  };
+
+  // Mapování pro klimatizace - speciální požadavky
+  const acAdditionalRequirementsLabels: { [key: string]: string } = {
+    'ac-design-focus': 'Důraz na design jednotek',
+    'ac-ultra-quiet': 'Extrémně tichý provoz',
+    'ac-allergy-filter': 'Filtrace alergenů',
+    'ac-quick-install': 'Rychlá instalace',
+    'ac-specific-brand': 'Konkrétní značka/výrobce',
+    'ac-maintenance-contract': 'Zájem o servisní smlouvu',
+    'ac-eco-friendly': 'Ekologické chladivo'
+  };
+
+  // Mapování pro tepelná čerpadla - stáří budovy
+  const hpBuildingAgeLabels: { [key: string]: string } = {
+    'hp-new': 'Novostavba (do 5 let)',
+    'hp-recent': '5-20 let',
+    'hp-older': '20-50 let',
+    'hp-historic': 'Nad 50 let'
+  };
+
+  // Mapování pro tepelná čerpadla - počet místností
+  const hpRoomCountLabels: { [key: string]: string } = {
+    'hp-1-2': '1-2 místnosti',
+    'hp-3-4': '3-4 místnosti',
+    'hp-5-6': '5-6 místností',
+    'hp-7+': '7 a více místností'
+  };
+
+  // Mapování pro tepelná čerpadla - současné vytápění
+  const hpCurrentHeatingLabels: { [key: string]: string } = {
+    'hp-gas': 'Plynový kotel',
+    'hp-electric': 'Elektrické topení',
+    'hp-solid-fuel': 'Kotel na tuhá paliva (uhlí, dřevo)',
+    'hp-heat-pump': 'Tepelné čerpadlo',
+    'hp-district': 'Dálkové vytápění',
+    'hp-central': 'Centrální vytápění',
+    'hp-other': 'Jiné'
+  };
+
+  // Mapování pro tepelná čerpadla - stáří vytápění
+  const hpCurrentHeatingAgeLabels: { [key: string]: string } = {
+    'hp-age-new': 'Nový (do 2 let)',
+    'hp-age-recent': '2-5 let',
+    'hp-age-older': '5-10 let',
+    'hp-age-old': '10-20 let',
+    'hp-age-very-old': 'Nad 20 let'
+  };
+
+  // Mapování pro tepelná čerpadla - rozvod tepla
+  const hpHeatingDistributionLabels: { [key: string]: string } = {
+    'hp-radiators': 'Radiátory',
+    'hp-floor-heating': 'Podlahové vytápění',
+    'hp-wall-heating': 'Stěnové vytápění',
+    'hp-air-heating': 'Teplovzdušné vytápění',
+    'hp-mixed': 'Kombinace více typů'
+  };
+
+  // Mapování pro tepelná čerpadla - efektivita vytápění
+  const hpCurrentHeatingEfficiencyLabels: { [key: string]: string } = {
+    'hp-efficient': 'Velmi efektivní',
+    'hp-average': 'Průměrně efektivní',
+    'hp-inefficient': 'Neefektivní',
+    'hp-unsure': 'Nejsem si jistý'
+  };
+
+  // Mapování pro tepelná čerpadla - zateplení
+  const hpInsulationStatusLabels: { [key: string]: string } = {
+    'hp-none': 'Bez zateplení',
+    'hp-partial': 'Částečné zateplení',
+    'hp-complete': 'Kompletní zateplení'
+  };
+
+  // Mapování pro tepelná čerpadla - okna
+  const hpWindowsStatusLabels: { [key: string]: string } = {
+    'hp-old': 'Stará jednoduchá/dvojitá',
+    'hp-plastic-double': 'Plastová dvojskla',
+    'hp-plastic-triple': 'Plastová trojskla',
+    'hp-wood-double': 'Dřevěná dvojskla',
+    'hp-wood-triple': 'Dřevěná trojskla',
+    'hp-aluminum': 'Hliníková okna',
+    'hp-mixed': 'Kombinace více typů'
+  };
+
+  // Mapování pro tepelná čerpadla - izolace střechy
+  const hpRoofInsulationLabels: { [key: string]: string } = {
+    'hp-roof-none': 'Bez izolace',
+    'hp-roof-minimal': 'Minimální izolace',
+    'hp-roof-standard': 'Standardní izolace',
+    'hp-roof-high': 'Nadstandardní izolace'
+  };
+
+  // Mapování pro tepelná čerpadla - tepelné mosty
+  const hpThermalBridgesLabels: { [key: string]: string } = {
+    'hp-bridges-none': 'Řešené/žádné',
+    'hp-bridges-minor': 'Menší problémy',
+    'hp-bridges-major': 'Výrazné tepelné mosty',
+    'hp-bridges-unsure': 'Nejsem si jistý'
+  };
+
+  // Mapování pro tepelná čerpadla - spotřeba tepla
+  const hpAnnualHeatingConsumptionLabels: { [key: string]: string } = {
+    'hp-consumption-unknown': 'Nevím',
+    'hp-consumption-5-10': '5-10 MWh',
+    'hp-consumption-10-15': '10-15 MWh',
+    'hp-consumption-15-20': '15-20 MWh',
+    'hp-consumption-20-30': '20-30 MWh',
+    'hp-consumption-30+': 'Nad 30 MWh'
+  };
+
+  // Mapování pro tepelná čerpadla - náklady na vytápění
+  const hpMonthlyHeatingCostsLabels: { [key: string]: string } = {
+    'hp-costs-unknown': 'Nevím',
+    'hp-costs-1000-2000': '1 000 - 2 000 Kč',
+    'hp-costs-2000-4000': '2 000 - 4 000 Kč',
+    'hp-costs-4000-6000': '4 000 - 6 000 Kč',
+    'hp-costs-6000-10000': '6 000 - 10 000 Kč',
+    'hp-costs-10000+': 'Nad 10 000 Kč'
+  };
+
+  // Mapování pro tepelná čerpadla - délka topné sezóny
+  const hpHeatingSeasonLengthLabels: { [key: string]: string } = {
+    'hp-season-short': 'Krátká (4-5 měsíců)',
+    'hp-season-medium': 'Střední (6-7 měsíců)',
+    'hp-season-long': 'Dlouhá (8+ měsíců)',
+    'hp-season-year-round': 'Celoroční vytápění'
+  };
+
+  // Mapování pro tepelná čerpadla - typ TČ
+  const hpTypeLabels: { [key: string]: string } = {
+    'hp-air-water': 'Vzduch-voda (nejběžnější)',
+    'hp-earth-water': 'Země-voda (vrty, kolektory)',
+    'hp-water-water': 'Voda-voda (studny)',
+    'hp-air-air': 'Vzduch-vzduch',
+    'hp-any': 'Nevím, potřebuji poradit'
+  };
+
+  // Mapování pro tepelná čerpadla - značky
+  const hpPreferredBrandLabels: { [key: string]: string } = {
+    'hp-mitsubishi': 'Mitsubishi Electric',
+    'hp-daikin': 'Daikin',
+    'hp-panasonic': 'Panasonic',
+    'hp-nibe': 'NIBE',
+    'hp-stiebel-eltron': 'Stiebel Eltron',
+    'hp-lg': 'LG',
+    'hp-samsung': 'Samsung',
+    'hp-bosch': 'Bosch',
+    'hp-viessmann': 'Viessmann',
+    'hp-vaillant': 'Vaillant',
+    'hp-other': 'Jiná',
+    'hp-no-preference': 'Nemám preference'
+  };
+
+  // Mapování pro tepelná čerpadla - výkon
+  const hpPreferredPowerLabels: { [key: string]: string } = {
+    'hp-power-unknown': 'Nevím, potřebuji poradit',
+    'hp-power-5-8': '5-8 kW',
+    'hp-power-8-12': '8-12 kW',
+    'hp-power-12-16': '12-16 kW',
+    'hp-power-16-22': '16-22 kW',
+    'hp-power-22+': 'Nad 22 kW'
+  };
+
+  // Mapování pro tepelná čerpadla - dodatečné funkce
+  const hpAdditionalFeaturesLabels: { [key: string]: string } = {
+    'hp-cooling': 'Chlazení v létě',
+    'hp-smart-control': 'Chytré ovládání přes aplikaci',
+    'hp-energy-monitoring': 'Monitoring spotřeby energie',
+    'hp-hybrid-operation': 'Hybridní provoz (s jiným zdrojem)',
+    'hp-weather-compensation': 'Ekvitermní regulace',
+    'hp-silence-mode': 'Tichý noční režim',
+    'hp-cascade-system': 'Kaskádové zapojení více jednotek'
+  };
+
+  // Mapování pro tepelná čerpadla - ohřev TUV
+  const hpHotWaterHeatingLabels: { [key: string]: string } = {
+    'hp-integrated': 'Požaduji integrovaný ohřev TUV',
+    'hp-separate': 'Požaduji oddělený systém ohřevu TUV',
+    'hp-no': 'Nepožaduji ohřev TUV',
+    'hp-unsure': 'Nejsem si jistý/á'
+  };
+
+  // Mapování pro tepelná čerpadla - záložní vytápění
+  const hpBackupHeatingLabels: { [key: string]: string } = {
+    'hp-backup-electric': 'Elektrické topné těleso',
+    'hp-backup-gas': 'Plynový kotel',
+    'hp-backup-none': 'Nepožaduji záložní zdroj',
+    'hp-backup-unsure': 'Nechám si poradit'
+  };
+
+  // Mapování pro tepelná čerpadla - obavy z hluku
+  const hpNoiseConcernsLabels: { [key: string]: string } = {
+    'hp-noise-high': 'Vysoké obavy (sousedé, ložnice)',
+    'hp-noise-moderate': 'Střední obavy',
+    'hp-noise-low': 'Nízké obavy',
+    'hp-noise-none': 'Žádné obavy'
+  };
+
+  // Mapování pro tepelná čerpadla - design
+  const hpDesignPreferencesLabels: { [key: string]: string } = {
+    'hp-design-important': 'Velmi důležitý (musí ladit s interiérem)',
+    'hp-design-somewhat': 'Středně důležitý',
+    'hp-design-not-important': 'Není důležitý'
+  };
+
+  // Mapování pro tepelná čerpadla - chytré funkce
+  const hpSmartFeaturesLabels: { [key: string]: string } = {
+    'hp-app-control': 'Ovládání přes mobilní aplikaci',
+    'hp-voice-control': 'Hlasové ovládání',
+    'hp-scheduling': 'Automatické plánování',
+    'hp-presence-detection': 'Detekce přítomnosti',
+    'hp-geofencing': 'Geofencing (automatické zapnutí při příchodu)',
+    'hp-energy-optimization': 'Automatická optimalizace spotřeby'
+  };
+
+  // Mapování pro tepelná čerpadla - údržba
+  const hpMaintenancePreferenceLabels: { [key: string]: string } = {
+    'hp-maintenance-full': 'Plná servisní smlouva',
+    'hp-maintenance-basic': 'Základní servis',
+    'hp-maintenance-none': 'Vlastní údržba',
+    'hp-maintenance-undecided': 'Ještě nevím'
+  };
+
+  // Mapování pro tepelná čerpadla - rozpočet
+  const hpBudgetLabels: { [key: string]: string } = {
+    'hp-up-to-150k': 'Do 150 000 Kč',
+    'hp-150k-250k': '150 000 - 250 000 Kč',
+    'hp-250k-350k': '250 000 - 350 000 Kč',
+    'hp-350k-500k': '350 000 - 500 000 Kč',
+    'hp-500k+': 'Nad 500 000 Kč',
+    'hp-unknown': 'Nemám stanovený rozpočet'
+  };
+
+  // Mapování pro tepelná čerpadla - časování instalace
+  const hpInstallationTimingLabels: { [key: string]: string } = {
+    'hp-more-than-year': 'Za více než rok',
+    'hp-just-info': 'Pouze zjišťuji informace'
+  };
+
+  // Mapování pro tepelná čerpadla - připravenost instalace
+  const hpInstallationReadinessLabels: { [key: string]: string } = {
+    'hp-existing-system': 'Stávající systém je funkční a může běžet',
+    'hp-needs-replacement': 'Stávající systém je potřeba kompletně nahradit',
+    'hp-electrical-ready': 'Elektroinstalace je připravena',
+    'hp-heat-distribution-ready': 'Rozvody topení jsou připraveny',
+    'hp-space-prepared': 'Prostor pro vnitřní jednotku je připraven',
+    'hp-permits-in-place': 'Mám potřebná povolení'
+  };
+
+  // Mapování pro tepelná čerpadla - fáze výstavby
+  const hpConstructionPhaseLabels: { [key: string]: string } = {
+    'hp-existing': 'Stávající stavba bez plánované rekonstrukce',
+    'hp-planned-renovation': 'Plánovaná rekonstrukce',
+    'hp-ongoing-renovation': 'Probíhající rekonstrukce',
+    'hp-new-construction': 'Novostavba ve výstavbě'
+  };
+
   // Mapování pro distribuční oblasti
   const distributionAreaLabels: { [key: string]: string } = {
     'cez': 'ČEZ Distribuce',
@@ -499,7 +957,9 @@ export const getFieldDisplayValue = (fieldId: string, value: any): string => {
     'cash': 'Hotovost/vlastní prostředky',
     'loan': 'Úvěr/leasing',
     'subsidy': 'Dotace + vlastní prostředky',
-    'combination': 'Kombinace více způsobů'
+    'combination': 'Kombinace více způsobů',
+    'ac-installments': 'Splátkový prodej',
+    'ac-undecided': 'Ještě nevím'
   };
 
   // Mapování pro počty osob a jednotek
@@ -627,6 +1087,7 @@ export const getFieldDisplayValue = (fieldId: string, value: any): string => {
     
     case 'budget':
       return budgetLabels[value] || value;
+      return budgetLabels[value] || acBudgetLabels[value] || hpBudgetLabels[value] || value;
     
     case 'timeline':
       return timelineLabels[value] || value;
@@ -706,6 +1167,191 @@ export const getFieldDisplayValue = (fieldId: string, value: any): string => {
         return value.map(v => systemSizeLabels[v] || v).join(', ');
       }
       return systemSizeLabels[value] || value;
+
+    // Klimatizace - nová pole
+    case 'buildingAge':
+      return acBuildingAgeLabels[value] || hpBuildingAgeLabels[value] || value;
+    
+    case 'ceilingHeight':
+      return acCeilingHeightLabels[value] || value;
+    
+    case 'acPurpose':
+      return acPurposeLabels[value] || value;
+    
+    case 'acRooms':
+      if (Array.isArray(value)) {
+        return value.map(v => acRoomsLabels[v] || v).join(', ');
+      }
+      return acRoomsLabels[value] || value;
+    
+    case 'acUnits':
+      return acUnitsLabels[value] || value;
+    
+    case 'acFeatures':
+      if (Array.isArray(value)) {
+        return value.map(v => acFeaturesLabels[v] || v).join(', ');
+      }
+      return acFeaturesLabels[value] || value;
+    
+    case 'acSmartFeatures':
+      if (Array.isArray(value)) {
+        return value.map(v => acSmartFeaturesLabels[v] || v).join(', ');
+      }
+      return acSmartFeaturesLabels[value] || value;
+    
+    case 'acEfficiency':
+      return acEfficiencyLabels[value] || value;
+    
+    case 'acCoolingPower':
+      return acCoolingPowerLabels[value] || value;
+    
+    case 'acHeatingPower':
+      return acHeatingPowerLabels[value] || value;
+    
+    case 'hasCooling':
+      return hasCoolingLabels[value] || value;
+    
+    case 'coolingType':
+      if (Array.isArray(value)) {
+        return value.map(v => coolingTypeLabels[v] || v).join(', ');
+      }
+      return coolingTypeLabels[value] || value;
+    
+    case 'coolingAge':
+      return coolingAgeLabels[value] || value;
+    
+    case 'coolingProblems':
+      if (Array.isArray(value)) {
+        return value.map(v => coolingProblemsLabels[v] || v).join(', ');
+      }
+      return coolingProblemsLabels[value] || value;
+    
+    case 'hasOutdoorSpace':
+      return hasOutdoorSpaceLabels[value] || value;
+    
+    case 'hasElectricalReadiness':
+      return hasElectricalReadinessLabels[value] || value;
+    
+    case 'hasWallPermission':
+      return hasWallPermissionLabels[value] || value;
+    
+    case 'outdoorUnitDistance':
+      return outdoorUnitDistanceLabels[value] || value;
+    
+    case 'hasOpenings':
+      return hasOpeningsLabels[value] || value;
+    
+    case 'renovationPlans':
+      return renovationPlansLabels[value] || value;
+    
+    case 'buildingRestrictions':
+      if (Array.isArray(value)) {
+        return value.map(v => buildingRestrictionsLabels[v] || v).join(', ');
+      }
+      return buildingRestrictionsLabels[value] || value;
+    
+    case 'installationTiming':
+      return acInstallationTimingLabels[value] || hpInstallationTimingLabels[value] || timelineLabels[value] || value;
+    
+    case 'preferredContactMethod':
+      return contactPreferenceLabels[value] || value;
+    
+    case 'preferredContactTime':
+      if (Array.isArray(value)) {
+        return value.map(v => contactTimeLabels[v] || v).join(', ');
+      }
+      return contactTimeLabels[value] || value;
+    
+    case 'additionalRequirements':
+      if (Array.isArray(value)) {
+        return value.map(v => acAdditionalRequirementsLabels[v] || v).join(', ');
+      }
+      return acAdditionalRequirementsLabels[value] || value;
+
+    // Tepelná čerpadla - nová pole
+    case 'roomCount':
+      return hpRoomCountLabels[value] || value;
+    
+    case 'currentHeating':
+      return hpCurrentHeatingLabels[value] || value;
+    
+    case 'currentHeatingAge':
+      return hpCurrentHeatingAgeLabels[value] || value;
+    
+    case 'heatingDistribution':
+      return hpHeatingDistributionLabels[value] || value;
+    
+    case 'currentHeatingEfficiency':
+      return hpCurrentHeatingEfficiencyLabels[value] || value;
+    
+    case 'insulationStatus':
+      return hpInsulationStatusLabels[value] || value;
+    
+    case 'windowsStatus':
+      return hpWindowsStatusLabels[value] || value;
+    
+    case 'roofInsulation':
+      return hpRoofInsulationLabels[value] || value;
+    
+    case 'thermalBridges':
+      return hpThermalBridgesLabels[value] || value;
+    
+    case 'annualHeatingConsumption':
+      return hpAnnualHeatingConsumptionLabels[value] || value;
+    
+    case 'monthlyHeatingCosts':
+      return hpMonthlyHeatingCostsLabels[value] || value;
+    
+    case 'heatingSeasonLength':
+      return hpHeatingSeasonLengthLabels[value] || value;
+    
+    case 'heatPumpType':
+      return hpTypeLabels[value] || heatPumpTypeLabels[value] || value;
+    
+    case 'preferredBrand':
+      if (Array.isArray(value)) {
+        return value.map(v => hpPreferredBrandLabels[v] || v).join(', ');
+      }
+      return hpPreferredBrandLabels[value] || value;
+    
+    case 'preferredPower':
+      return hpPreferredPowerLabels[value] || value;
+    
+    case 'additionalFeatures':
+      if (Array.isArray(value)) {
+        return value.map(v => hpAdditionalFeaturesLabels[v] || v).join(', ');
+      }
+      return hpAdditionalFeaturesLabels[value] || value;
+    
+    case 'hotWaterHeating':
+      return hpHotWaterHeatingLabels[value] || value;
+    
+    case 'backupHeating':
+      return hpBackupHeatingLabels[value] || value;
+    
+    case 'noiseConcerns':
+      return hpNoiseConcernsLabels[value] || value;
+    
+    case 'designPreferences':
+      return hpDesignPreferencesLabels[value] || value;
+    
+    case 'smartFeatures':
+      if (Array.isArray(value)) {
+        return value.map(v => hpSmartFeaturesLabels[v] || v).join(', ');
+      }
+      return hpSmartFeaturesLabels[value] || value;
+    
+    case 'maintenancePreference':
+      return hpMaintenancePreferenceLabels[value] || value;
+    
+    case 'installationReadiness':
+      if (Array.isArray(value)) {
+        return value.map(v => hpInstallationReadinessLabels[v] || v).join(', ');
+      }
+      return hpInstallationReadinessLabels[value] || value;
+    
+    case 'constructionPhase':
+      return hpConstructionPhaseLabels[value] || value;
 
     default:
       // Pro ostatní pole vrátit hodnotu jak je
